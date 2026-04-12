@@ -5,6 +5,10 @@ trust/
 trust-keys/
 pd/
 
+# Additional PD sub-projects that may live in the workspace
+website/
+collab/
+
 # macOS
 .DS_Store
 

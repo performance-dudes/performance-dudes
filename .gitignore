@@ -1,0 +1,19 @@
+# Sub-repos cloned into this workspace by the setup flow.
+# They are separate git repositories and never committed here.
+orga/
+trust/
+trust-keys/
+pd/
+
+# macOS
+.DS_Store
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local scratch
+scratch/
+tmp/

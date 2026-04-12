@@ -38,6 +38,16 @@ All repos clone as siblings to this one: `../trust`, `../pd`, etc.
 But since the user is IN this repo when running Claude, clone them INTO this repo's directory (they are gitignored here):
 - `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`
 
+## First Claude Code session — add the marketplace
+
+This workspace has the `pd` plugin enabled at project scope (in `.claude/settings.json`). For Claude Code to resolve it, the user must register the `pd` marketplace once on their machine:
+
+```bash
+claude plugin marketplace add performance-dudes/pd
+```
+
+After that, Claude Code discovers the plugin and the `/pd:*` skills become available. This is per-user on the machine, not per-clone — once added, any future clone of this workspace picks it up.
+
 ## Prerequisites check
 
 Before cloning anything, verify the user has:

@@ -1,4 +1,12 @@
 {
+  "extraKnownMarketplaces": {
+    "pd": {
+      "source": {
+        "source": "github",
+        "repo": "performance-dudes/pd"
+      }
+    }
+  },
   "enabledPlugins": {
     "pd@pd": true
   }

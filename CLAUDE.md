@@ -29,18 +29,34 @@ Remember the answer. Use it to decide which repos to clone.
 
 | Role | Clone these |
 |---|---|
-| Founder | `trust`, `trust-keys`, `orga`, `pd` |
-| Partner | `trust`, `trust-keys`, `pd` |
+| Founder | `trust`, `trust-keys`, `orga`, `pd`, `skills-private` |
+| Partner | `trust`, `trust-keys`, `pd`, `skills-private` |
 | Member | `trust`, `pd` |
 | Exploring | `trust`, `pd` |
 
 All repos clone as siblings to this one: `../trust`, `../pd`, etc.
 But since the user is IN this repo when running Claude, clone them INTO this repo's directory (they are gitignored here):
-- `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`
+- `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`, `./skills-private/`
 
-## Plugin
+## Plugins
 
-This workspace ships with the `pd` plugin enabled at project scope (see `.claude/settings.json`). The marketplace is also declared there via `extraKnownMarketplaces`, so Claude Code discovers the plugin automatically on first launch from this directory — no manual `claude plugin marketplace add` step needed. The user will see a consent prompt when they first trust this workspace.
+This workspace ships with two Claude Code plugins declared in `.claude/settings.json`:
+
+| Plugin | Repo | Visibility | Content |
+|--------|------|------------|---------|
+| `pd` | performance-dudes/pd | Public | Document signing, trust infrastructure |
+| `skills-private` | performance-dudes/skills-private | Private | Brand, proposals, workflow automation |
+
+Both are installed from local clones (not remote). After cloning the sub-repos, register and install:
+
+```bash
+claude plugin marketplace add ./pd
+claude plugin install pd
+claude plugin marketplace add ./skills-private
+claude plugin install skills-private
+```
+
+Run `/reload-plugins` to activate. The `skills-private` repo requires org membership (private).
 
 ## Prerequisites check
 

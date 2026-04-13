@@ -4,6 +4,7 @@ orga/
 trust/
 trust-keys/
 pd/
+skills-private/
 
 # Additional PD sub-projects that may live in the workspace
 website/
@@ -18,6 +19,21 @@ collab/
 *.swp
 *.swo
 
+# Additional sub-repos
+culture/
+
 # Local scratch
 scratch/
 tmp/
+_backup/
+
+# Secrets
+.env
+
+# Local tooling and assets
+brand-mocks/
+.playwright-mcp/
+generate-image.py
+generate-pdf.py
+out/
+*.png

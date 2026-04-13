@@ -2,12 +2,19 @@
   "extraKnownMarketplaces": {
     "pd": {
       "source": {
-        "source": "github",
-        "repo": "performance-dudes/pd"
+        "source": "directory",
+        "path": "./pd"
+      }
+    },
+    "skills-private": {
+      "source": {
+        "source": "directory",
+        "path": "./skills-private"
       }
     }
   },
   "enabledPlugins": {
-    "pd@pd": true
+    "pd@pd": true,
+    "skills-private@skills-private": true
   }
 }

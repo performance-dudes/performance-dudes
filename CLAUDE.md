@@ -128,6 +128,12 @@ Same as partner but:
 - Install tools without asking first (especially if requiring sudo)
 - Approve workflow runs on the user's behalf unless explicitly asked (you *can* approve via `gh api`, but ask first)
 
+## Commits
+
+- Conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `style:`.
+- **Header:** What changed. Short, conventional commit format.
+- **Body:** Why it changed. The broader context, intention, and motivation that cannot be derived from the diff. What problem was solved, what feedback triggered the change, what trade-off was made. Do not repeat what the diff shows. Write the context that would be lost without this message.
+
 ## Reference
 
 - [trust README](https://github.com/performance-dudes/trust) — PKI setup, workflows

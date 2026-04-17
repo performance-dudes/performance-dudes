@@ -29,14 +29,14 @@ Remember the answer. Use it to decide which repos to clone.
 
 | Role | Clone these |
 |---|---|
-| Founder | `trust`, `trust-keys`, `orga`, `pd`, `skills-private` |
+| Founder | `trust`, `trust-keys`, `orga`, `pd`, `skills-private`, `culture` |
 | Partner | `trust`, `trust-keys`, `pd`, `skills-private` |
 | Member | `trust`, `pd` |
 | Exploring | `trust`, `pd` |
 
 All repos clone as siblings to this one: `../trust`, `../pd`, etc.
 But since the user is IN this repo when running Claude, clone them INTO this repo's directory (they are gitignored here):
-- `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`, `./skills-private/`
+- `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`, `./skills-private/`, `./culture/`
 
 ## Plugins
 

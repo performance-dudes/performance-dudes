@@ -1,4 +1,8 @@
 {
+  "enabledPlugins": {
+    "pd@pd": true,
+    "skills-private@skills-private": true
+  },
   "extraKnownMarketplaces": {
     "pd": {
       "source": {
@@ -12,9 +16,5 @@
         "path": "./skills-private"
       }
     }
-  },
-  "enabledPlugins": {
-    "pd@pd": true,
-    "skills-private@skills-private": true
   }
 }

@@ -9,7 +9,7 @@ skills-private/
 # Additional PD sub-projects that may live in the workspace
 website/
 collab/
-marketing-material/
+marketing/
 
 # macOS
 .DS_Store

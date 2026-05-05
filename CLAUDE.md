@@ -29,14 +29,16 @@ Remember the answer. Use it to decide which repos to clone.
 
 | Role | Clone these |
 |---|---|
-| Founder | `trust`, `trust-keys`, `orga`, `pd`, `skills-private`, `culture` |
-| Partner | `trust`, `trust-keys`, `pd`, `skills-private` |
-| Member | `trust`, `pd` |
+| Founder | `trust`, `trust-keys`, `orga`, `pd`, `skills-private`, `culture`, `brand` |
+| Partner | `trust`, `trust-keys`, `pd`, `skills-private`, `brand` |
+| Member | `trust`, `pd`, `brand` |
 | Exploring | `trust`, `pd` |
+
+`brand` is a private repo with ready-to-use brand assets (Teams backgrounds, logos, templates). Brand specs themselves live in the `brand-uix` skill (skills-private), which is the single source of truth.
 
 All repos clone as siblings to this one: `../trust`, `../pd`, etc.
 But since the user is IN this repo when running Claude, clone them INTO this repo's directory (they are gitignored here):
-- `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`, `./skills-private/`, `./culture/`
+- `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`, `./skills-private/`, `./culture/`, `./brand/`
 
 ## Plugins
 

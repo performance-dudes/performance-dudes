@@ -130,6 +130,16 @@ Same as partner but:
 - Install tools without asking first (especially if requiring sudo)
 - Approve workflow runs on the user's behalf unless explicitly asked (you *can* approve via `gh api`, but ask first)
 
+## Path conventions in shared docs
+
+When writing in any tracked file of `performance-dudes/*` (this repo, orga, companions like be-plus, ...), refer to locations relative to the PD workspace root, not to a home directory. Use:
+
+- `<pd-workspace>/<account>/` for companion paths
+- `<companion>/<repo>/` for client-code clones inside a companion
+- `../<sibling>/` for cross-references between sub-repos at the same level
+
+`~/work/` and other home-directory paths are local to one user and must not appear in shared docs. Authority: `orga/decisions/2026-05-07-companion-workspace-location.md`.
+
 ## Commits
 
 - Conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `style:`.

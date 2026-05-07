@@ -11,6 +11,9 @@ website/
 collab/
 marketing-material/
 
+# Per-account companion workspaces (own remotes, e.g. performance-dudes/be-plus)
+be-plus/
+
 # macOS
 .DS_Store
 

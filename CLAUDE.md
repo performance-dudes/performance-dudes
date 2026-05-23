@@ -82,8 +82,25 @@ Run them via the Bash tool and report back.
 
 ## Clone the sub-repos
 
-For each repo in the user's role list, follow the **PD default: worktree layout**
-(see "Worktree convention" below):
+For each repo in the user's role list:
+
+1. **Read the repo's own `CLAUDE.md`** for a `## Setup default` section. That
+   section is the authoritative recommendation for how a fresh clone of that
+   repo should be laid out.
+2. Apply the declared default. If no default is declared, fall back to a
+   classic clone.
+3. **Ask the team member once** if they want to follow the declared default
+   or use a different layout. Per-person preference always wins — the repo
+   default is a recommendation, not a constraint.
+
+**Classic clone:**
+
+```bash
+git clone git@github.com:performance-dudes/<repo>.git
+```
+
+**Worktree layout** (bare repo + `main` worktree + one worktree per active
+PR — see "Setup-default patterns" below for the rationale):
 
 ```bash
 mkdir <repo> && cd <repo>
@@ -95,60 +112,65 @@ git worktree add main main
 cd ..
 ```
 
-Resulting layout per repo: `<repo>/.bare/` (bare repo), `<repo>/main/` (main
-worktree), and one additional worktree per active PR (`<repo>/pr<n>-<slug>/`).
+Resulting layout per worktree repo: `<repo>/.bare/` (bare repo), `<repo>/main/`
+(main worktree), and one additional worktree per active PR
+(`<repo>/pr<n>-<slug>/`).
 
-If `git clone --bare` fails for a private repo, the user doesn't have access —
+If `git clone` fails for a private repo, the user doesn't have access —
 report clearly and move on.
 
-## Worktree convention
+## Repo-defined setup defaults
 
-**PD default for every sub-repo: one worktree per active PR.** Bare repo at
-`<repo>/.bare`, main branch checked out at `<repo>/main`, every open PR gets
-its own worktree at `<repo>/pr<n>-<slug>` so parallel work does not collide on
-a single working tree.
+Every PD sub-repo declares its **setup default** in its own `CLAUDE.md`,
+under a `## Setup default` heading. The default tells a fresh setup which
+layout makes sense for that repo. The workspace root (this `CLAUDE.md`)
+does not maintain a central allowlist — it just reads what each repo
+declares.
 
-Apply when starting work on a new branch:
+**Team members may always override** the per-repo default. The declared
+default exists to make a fresh setup sensible without per-repo back-and-forth.
+Once a workspace is set up, individual workflow is unconstrained — Claude
+should respect whatever layout the team member chose for their local copy.
 
-```bash
-cd <repo>/.bare
-git worktree add ../pr<n>-<slug> -b <branch-name> origin/main
-```
+### Setup-default patterns
 
-Reasons for the default:
+Two patterns are common; a repo's `CLAUDE.md` should state which one applies
+and (briefly) why.
 
-- Parallel PRs without `git stash` ping-pong.
-- Long-running builds / generated artifacts stay isolated per PR.
-- `main` is always clean for quick reads and reference.
+- **classic** — single `<repo>/.git` clone. Right for repos with infrequent
+  PRs, small surface area, or tooling that does not cope with bare repos.
+  This is also the fallback when no default is declared.
+- **worktree** — bare repo at `<repo>/.bare`, main checked out at
+  `<repo>/main`, every open PR gets its own worktree at `<repo>/pr<n>-<slug>`.
+  Right where parallel PRs are common and build/output artifacts benefit from
+  isolation. Apply when starting work on a new branch:
 
-**No opt-out.** The worktree layout applies to every PD sub-repo. Sub-repos
-that currently use a classic `<repo>/.git` clone get migrated **on next touch**
-(first time someone needs to start work on them after this convention took
-effect). Migration steps for a classic clone:
+  ```bash
+  cd <repo>/.bare
+  git worktree add ../pr<n>-<slug> -b <branch-name> origin/main
+  ```
 
-```bash
-# from the workspace root, with the classic <repo>/ checked out on main and clean
-cd <repo>
-# preserve any local-only branches first: push them or note them down
-git push --all origin   # optional, only if you have local branches not yet pushed
-cd ..
-mv <repo> <repo>.classic-backup
-mkdir <repo> && cd <repo>
-git clone --bare git@github.com:performance-dudes/<repo>.git .bare
-echo "gitdir: ./.bare" > .git
-git -C .bare config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-git -C .bare fetch origin
-git worktree add main main
-cd ..
-# verify the new layout works, then drop the backup
-rm -rf <repo>.classic-backup
-```
+  Reasons for worktree where it applies: parallel PRs without `git stash`
+  ping-pong, isolated build artefacts per PR, `main` always clean for quick
+  reads and reference.
 
-Current state (as of this revision):
+If a repo's `CLAUDE.md` has no `## Setup default` section yet, the safe
+fallback is **classic**. Filling in the default for a repo is a small docs
+PR in that repo — not a precondition for cloning it.
 
-- `orga/` — worktree (already on the new layout).
-- `pd/`, `be-plus/`, `website/`, `skills-private/`, `trust/`, `performance-dudes/`
-  (this repo) — still classic clones; migrate on next touch.
+## Merge policy
+
+**Never merge a PR without explicit user approval.** When work for a PR is
+ready: open the PR with `gh pr create`, then hand the PR URL back to the user
+and stop. Wait for a clear "merge" instruction before running `gh pr merge`.
+
+Applies to every PD repo. Reason: merging is the user's call (timing, branch
+hygiene, stacked-PR coordination); Claude's job is to land reviewable changes,
+not to ship them.
+
+The same rule applies to follow-up actions that are easy to confuse with
+"finishing the PR": branch deletion, force-pushes that rewrite shared history,
+release tagging. None of those happen without an explicit go-ahead.
 
 ## Setup by role
 

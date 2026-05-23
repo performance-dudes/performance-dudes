@@ -82,13 +82,73 @@ Run them via the Bash tool and report back.
 
 ## Clone the sub-repos
 
-For each repo in the user's role list:
+For each repo in the user's role list, follow the **PD default: worktree layout**
+(see "Worktree convention" below):
 
 ```bash
-git clone git@github.com:performance-dudes/<repo>.git
+mkdir <repo> && cd <repo>
+git clone --bare git@github.com:performance-dudes/<repo>.git .bare
+echo "gitdir: ./.bare" > .git
+git -C .bare config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+git -C .bare fetch origin
+git worktree add main main
+cd ..
 ```
 
-If `git clone` fails for a private repo, the user doesn't have access — report clearly and move on.
+Resulting layout per repo: `<repo>/.bare/` (bare repo), `<repo>/main/` (main
+worktree), and one additional worktree per active PR (`<repo>/pr<n>-<slug>/`).
+
+If `git clone --bare` fails for a private repo, the user doesn't have access —
+report clearly and move on.
+
+## Worktree convention
+
+**PD default for every sub-repo: one worktree per active PR.** Bare repo at
+`<repo>/.bare`, main branch checked out at `<repo>/main`, every open PR gets
+its own worktree at `<repo>/pr<n>-<slug>` so parallel work does not collide on
+a single working tree.
+
+Apply when starting work on a new branch:
+
+```bash
+cd <repo>/.bare
+git worktree add ../pr<n>-<slug> -b <branch-name> origin/main
+```
+
+Reasons for the default:
+
+- Parallel PRs without `git stash` ping-pong.
+- Long-running builds / generated artifacts stay isolated per PR.
+- `main` is always clean for quick reads and reference.
+
+**No opt-out.** The worktree layout applies to every PD sub-repo. Sub-repos
+that currently use a classic `<repo>/.git` clone get migrated **on next touch**
+(first time someone needs to start work on them after this convention took
+effect). Migration steps for a classic clone:
+
+```bash
+# from the workspace root, with the classic <repo>/ checked out on main and clean
+cd <repo>
+# preserve any local-only branches first: push them or note them down
+git push --all origin   # optional, only if you have local branches not yet pushed
+cd ..
+mv <repo> <repo>.classic-backup
+mkdir <repo> && cd <repo>
+git clone --bare git@github.com:performance-dudes/<repo>.git .bare
+echo "gitdir: ./.bare" > .git
+git -C .bare config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+git -C .bare fetch origin
+git worktree add main main
+cd ..
+# verify the new layout works, then drop the backup
+rm -rf <repo>.classic-backup
+```
+
+Current state (as of this revision):
+
+- `orga/` — worktree (already on the new layout).
+- `pd/`, `be-plus/`, `website/`, `skills-private/`, `trust/`, `performance-dudes/`
+  (this repo) — still classic clones; migrate on next touch.
 
 ## Setup by role
 

@@ -159,8 +159,6 @@ PKI-Onboarding (key/CSR/Cert, harden-signing) folgt [`pd/README.md`](pd/README.m
 
 Founder können über die geteilte Signal-Gruppe in Claude-Sessions miteinander koordinieren. Setup-Walkthrough liegt im skills-private-Plugin: `skills-private/channels/agent-sync/README.md`. Voraussetzungen: GitHub-Org-Mitgliedschaft, eigenes signal-cli + Signal-Account in der PD-Gruppe, `cloudflared` für die Access-Auth. Architektur, Server- und Relay-Code, ADRs: separates Repo `performance-dudes/agent-sync`.
 
-`pd-sync` läuft als Vorgänger noch parallel. Neue Setups gehen direkt auf agent-sync.
-
 ## Things you should NOT do
 
 - Run `harden-signing.sh` or anything that captures the passphrase (user must run it themselves)

@@ -83,37 +83,9 @@ If any are missing:
 
 Run them via the Bash tool and report back.
 
-## Pre-Commit Secret Prevention (Workspace)
+## Pre-Commit Secret Prevention
 
-Verhindert versehentlichen Commit von Secrets (API-Keys, Tokens, Telefonnummern, private Keys). Zwei Gates pro Commit:
-
-1. **gitleaks** scannt den staged diff gegen ~140 vendor-spezifische Token-Shapes (AWS, Stripe, GitHub, Slack, JWT, Private Keys, Entropy-Heuristik). Verbose-Ausgabe redaktiert die Treffer.
-2. **Custom Patterns** ergänzen PD-spezifische Marker: deutsche/bulgarische Telefonnummern (Beispiele in Identity-Maps), `HCLOUD_TOKEN=...`, `CF_ACCESS_CLIENT_SECRET=...`, signal-cli-Argumente mit Telefonnummer.
-
-Setup nach frischem Workspace-Clone (einmal pro Maschine):
-
-```bash
-brew install lefthook gitleaks
-cd performance-dudes
-lefthook install     # schreibt .git/hooks/pre-commit
-```
-
-Verify:
-
-```bash
-ls -la .git/hooks/pre-commit   # muss existieren, executable
-```
-
-Bypass nur bei dokumentiertem Sonderfall:
-
-```bash
-LEFTHOOK=0 git commit -m "..."     # lefthook überspringen
-git commit --no-verify -m "..."    # alle git-hooks überspringen
-```
-
-Wenn der Gate ein false positive meldet: lieber den Wert anonymisieren statt Bypass. Tatsächliche Secrets gehören nach `~/.config/pd/` (gitignored auf jeder PD-Maschine).
-
-Config liegt in `lefthook.yml` im Workspace-Root. Sub-Repos haben eigene Gates (siehe ihre `CLAUDE.md`).
+Workspace-Hook (gitleaks + PD-Custom-Patterns) verhindert versehentliche Secret-Commits. Setup einmal pro Maschine: `brew install lefthook gitleaks && lefthook install`. Regeln und Bypass-Pfad: siehe `lefthook.yml` (kommentiert). Tatsächliche Secrets gehören in `~/.config/pd/` (gitignored). Sub-Repos haben eigene Gates, siehe deren `CLAUDE.md`.
 
 ## Clone the sub-repos
 
@@ -156,42 +128,7 @@ report clearly and move on.
 
 ## Repo-defined setup defaults
 
-Every PD sub-repo declares its **setup default** in its own `CLAUDE.md`,
-under a `## Setup default` heading. The default tells a fresh setup which
-layout makes sense for that repo. The workspace root (this `CLAUDE.md`)
-does not maintain a central allowlist — it just reads what each repo
-declares.
-
-**Team members may always override** the per-repo default. The declared
-default exists to make a fresh setup sensible without per-repo back-and-forth.
-Once a workspace is set up, individual workflow is unconstrained — Claude
-should respect whatever layout the team member chose for their local copy.
-
-### Setup-default patterns
-
-Two patterns are common; a repo's `CLAUDE.md` should state which one applies
-and (briefly) why.
-
-- **classic** — single `<repo>/.git` clone. Right for repos with infrequent
-  PRs, small surface area, or tooling that does not cope with bare repos.
-  This is also the fallback when no default is declared.
-- **worktree** — bare repo at `<repo>/.bare`, main checked out at
-  `<repo>/main`, every open PR gets its own worktree at `<repo>/pr<n>-<slug>`.
-  Right where parallel PRs are common and build/output artifacts benefit from
-  isolation. Apply when starting work on a new branch:
-
-  ```bash
-  cd <repo>/.bare
-  git worktree add ../pr<n>-<slug> -b <branch-name> origin/main
-  ```
-
-  Reasons for worktree where it applies: parallel PRs without `git stash`
-  ping-pong, isolated build artefacts per PR, `main` always clean for quick
-  reads and reference.
-
-If a repo's `CLAUDE.md` has no `## Setup default` section yet, the safe
-fallback is **classic**. Filling in the default for a repo is a small docs
-PR in that repo — not a precondition for cloning it.
+Jedes Sub-Repo deklariert sein Setup-Layout in seinem `CLAUDE.md` unter `## Setup default`. Pattern ist entweder **classic** (`git clone`) oder **worktree** (bare + worktree pro PR). Ohne Deklaration: classic. Team-Member-Override geht jederzeit. Workspace hält keine zentrale Allowlist; was im Sub-Repo steht, gilt.
 
 ## Merge policy
 
@@ -209,36 +146,20 @@ release tagging. None of those happen without an explicit go-ahead.
 
 ## Setup by role
 
-### Founder or Partner
+PKI-Onboarding (key/CSR/Cert, harden-signing) folgt [`pd/README.md`](pd/README.md). Rollen-Differenzen:
 
-Follow the setup in [`pd/README.md`](pd/README.md):
+- **Founder**: signiert eigenen Cert (`issuer` = eigener GitHub-User), nach `pki-issue`-Workflow Cert-PR mergen.
+- **Partner**: gleich wie Founder, aber ein Founder hat vorher `pki-onboard` für die Partner-Issuing-CA gefahren.
+- **Member**: kein `trust-keys`-Zugriff, CSR wird vom Partner mit dessen Issuing CA signiert (Partner oder Founder triggert `pki-issue` mit Partner-Username als `issuer`).
+- **Just exploring**: nur Verify-Pfad, kein Key-Gen (`uv run scripts/verify.py <pdf> --trust ../trust` in `pd/`).
 
-1. `cd pd && uv run scripts/setup.py --username <gh-user> --email <email> --trust ../trust`
-2. Commit and push the CSR: `cd ../trust && git add pki/csrs/<user>.csr && git commit -m "feat: add CSR for <user>" && git push`
-3. Trigger `pki-issue` workflow:
-   ```bash
-   gh workflow run pki-issue.yml --repo performance-dudes/trust \
-     -f issuer=<ISSUING_CA_USERNAME> \
-     -f csr_path=pki/csrs/<user>.csr
-   ```
-   - For a founder signing their own cert, `issuer` = their own GitHub username.
-   - For a partner being onboarded, a founder has already run `pki-onboard` and issued the partner's Issuing CA. The partner then uses their own username as issuer.
-4. After the workflow runs, approve the environment gate in the GitHub UI, merge the cert PR.
-5. Pull the cert: `cd ../trust && git pull`
-6. Extract a signature image: `uv run scripts/extract-signature.py <signed-pdf>` (user creates it with Preview first)
-7. Run `./scripts/harden-signing.sh` — user runs this themselves (passphrase handling).
+`harden-signing.sh` führt der Mensch selbst aus (Passphrase, siehe „Things you should NOT do").
 
-### Member
+## agent-sync channel (optional, für Founder)
 
-Same as partner but:
-- No `trust-keys` access
-- CSR must be signed by their partner's Issuing CA, not their own (the partner — or a founder — runs the `pki-issue` workflow with the partner's username as `issuer`)
+Founder können über die geteilte Signal-Gruppe in Claude-Sessions miteinander koordinieren. Setup-Walkthrough liegt im skills-private-Plugin: `skills-private/channels/agent-sync/README.md`. Voraussetzungen: GitHub-Org-Mitgliedschaft, eigenes signal-cli + Signal-Account in der PD-Gruppe, `cloudflared` für die Access-Auth. Architektur, Server- und Relay-Code, ADRs: separates Repo `performance-dudes/agent-sync`.
 
-### Just exploring
-
-- Clone `trust` and `pd` (both public)
-- Show them how to verify signed PDFs: `cd pd && uv run scripts/verify.py some-signed.pdf --trust ../trust`
-- No key generation needed
+`pd-sync` läuft als Vorgänger noch parallel. Neue Setups gehen direkt auf agent-sync.
 
 ## Things you should NOT do
 

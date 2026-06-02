@@ -1,0 +1,55 @@
+# Lefthook — Performance Dudes Workspace pre-commit gate
+#
+# Verhindert versehentliches Committen von Secrets (API-Keys, Tokens,
+# Telefonnummern, private Keys) und sensiblen Patterns. Workspace-Level —
+# greift auf jeden Commit gegen das base Repo. Sub-Repos haben ihre eigenen
+# Gates, dieser hier ist der Workspace-Schutz.
+#
+# Setup nach frischem Clone:
+#   brew install lefthook gitleaks
+#   lefthook install     # registriert den native git-Hook
+#
+# Bypass nur bei dokumentierten Sonderfällen:
+#   LEFTHOOK=0 git commit -m "..."
+#   git commit --no-verify -m "..."
+
+pre-commit:
+  parallel: true
+  commands:
+    secrets-scan:
+      tags: security
+      skip:
+        - merge
+        - rebase
+      run: gitleaks protect --staged --redact --no-banner --verbose
+      fail_text: |
+        gitleaks fehlt oder hat ein Secret gefunden.
+        Install:  brew install gitleaks
+        Bypass:   nur wenn ein dokumentierter false positive vorliegt
+                  (selten — eher den Wert anonymisieren).
+
+    custom-patterns:
+      tags: security
+      skip:
+        - merge
+        - rebase
+      # Custom Patterns ergänzen gitleaks-Defaults (140+ vendor-Regeln) um
+      # PD-spezifische Marker: Telefonnummern in Doku, hcloud-API-Token,
+      # Signal-Account-Beispiele. Scannt nur den staged diff (Hinzufügungen).
+      run: |
+        DIFF=$(git diff --cached --diff-filter=ACMR -U0 -- ':!lefthook.yml')
+        if [ -z "$DIFF" ]; then exit 0; fi
+        HITS=$(echo "$DIFF" | grep -E '^\+' | grep -nE \
+          '\+(49|41|43|359)[0-9]{8,12}|hcloud[_-]?token|HCLOUD_TOKEN=[A-Za-z0-9]{32,}|CF_ACCESS_CLIENT_SECRET=[A-Za-z0-9]{40,}|signal-cli.*\+[0-9]{10,15}' \
+          || true)
+        if [ -n "$HITS" ]; then
+          echo ""
+          echo "Custom pattern hit:"
+          echo "$HITS"
+          echo ""
+          echo "Lösungen:"
+          echo "  - Telefonnummer durch +49xxxxxxxxxx ersetzen"
+          echo "  - Token in ~/.config/pd/* auslagern (gitignored)"
+          echo "  - Signal-Account aus Beispielen anonymisieren"
+          exit 1
+        fi

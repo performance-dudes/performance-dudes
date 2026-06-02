@@ -69,6 +69,8 @@ command -v git && git --version
 command -v gh && gh --version
 command -v uv && uv --version
 command -v openssl && openssl version
+command -v lefthook && lefthook version
+command -v gitleaks && gitleaks version
 gh auth status
 ```
 
@@ -77,8 +79,41 @@ If any are missing:
 - `gh`: `brew install gh` then `gh auth login`
 - `uv`: `brew install uv` (or `curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - `openssl`: usually pre-installed on macOS
+- `lefthook` + `gitleaks`: `brew install lefthook gitleaks` (siehe „Pre-Commit Secret Prevention" unten)
 
 Run them via the Bash tool and report back.
+
+## Pre-Commit Secret Prevention (Workspace)
+
+Verhindert versehentlichen Commit von Secrets (API-Keys, Tokens, Telefonnummern, private Keys). Zwei Gates pro Commit:
+
+1. **gitleaks** scannt den staged diff gegen ~140 vendor-spezifische Token-Shapes (AWS, Stripe, GitHub, Slack, JWT, Private Keys, Entropy-Heuristik). Verbose-Ausgabe redaktiert die Treffer.
+2. **Custom Patterns** ergänzen PD-spezifische Marker: deutsche/bulgarische Telefonnummern (Beispiele in Identity-Maps), `HCLOUD_TOKEN=...`, `CF_ACCESS_CLIENT_SECRET=...`, signal-cli-Argumente mit Telefonnummer.
+
+Setup nach frischem Workspace-Clone (einmal pro Maschine):
+
+```bash
+brew install lefthook gitleaks
+cd performance-dudes
+lefthook install     # schreibt .git/hooks/pre-commit
+```
+
+Verify:
+
+```bash
+ls -la .git/hooks/pre-commit   # muss existieren, executable
+```
+
+Bypass nur bei dokumentiertem Sonderfall:
+
+```bash
+LEFTHOOK=0 git commit -m "..."     # lefthook überspringen
+git commit --no-verify -m "..."    # alle git-hooks überspringen
+```
+
+Wenn der Gate ein false positive meldet: lieber den Wert anonymisieren statt Bypass. Tatsächliche Secrets gehören nach `~/.config/pd/` (gitignored auf jeder PD-Maschine).
+
+Config liegt in `lefthook.yml` im Workspace-Root. Sub-Repos haben eigene Gates (siehe ihre `CLAUDE.md`).
 
 ## Clone the sub-repos
 

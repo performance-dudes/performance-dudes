@@ -14,8 +14,8 @@ marketing/
 # Per-account companion workspaces (own remotes, e.g. performance-dudes/be-plus)
 be-plus/
 
-# Per-account companion workspaces (own remotes, e.g. performance-dudes/be-plus)
-be-plus/
+# Per-account companion workspace, lokal-only (kein PD-Repo): Miltenyi
+miltenyi/
 
 # macOS
 .DS_Store

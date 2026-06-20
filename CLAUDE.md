@@ -184,7 +184,35 @@ PKI-Onboarding (key/CSR/Cert, harden-signing) folgt [`pd/README.md`](pd/README.m
 
 ## agent-sync channel (dudes + partners)
 
-Dudes und Partner können über die geteilte Signal-Gruppe in Claude-Sessions koordinieren. Der Kanal ist ein eigenes Plugin `agent-sync@ai-plugins-internal` (User-Scope-Marketplace, pro Projekt enabled — siehe „Plugins"); Setup-Walkthrough liegt im Plugin: `ai-plugins-internal/agent-sync/server/README.md`. Voraussetzungen: GitHub-Org-Mitgliedschaft (Team `dudes`/`partners`), eigenes signal-cli + Signal-Account in der PD-Gruppe, `cloudflared` für die Access-Auth. Start-Flag: `claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal`. Architektur, Server- und Relay-Code, ADRs: separates Repo `performance-dudes/agent-sync`.
+Dudes und Partner koordinieren über die geteilte Signal-Gruppe direkt aus
+Claude-Code-Sessions (Agent↔Agent + Signal an Menschen). Der Kanal ist das Plugin
+`agent-sync@ai-plugins-internal`. Voller Walkthrough:
+`ai-plugins-internal/agent-sync/server/README.md` — hier die Schritte als
+Onboarding-Checkliste:
+
+1. **Marketplace + Plugin** (siehe „Plugins"): `ai-plugins-internal` im User-Scope
+   registriert, `agent-sync@ai-plugins-internal` im Workspace enabled.
+2. **Voraussetzungen** (ein Founder bestätigt sie): GitHub-Org-Mitglied (Team
+   `dudes`/`partners` → Cloudflare Access lässt durch) **und** Signal-Account in
+   der „Performance-Dudes"-Gruppe. Ohne 1. → jeder API-Call 401/403; ohne 2. →
+   Receive-Pfad verwirft still.
+3. **Tools**: `node` ≥ 20, `cloudflared` (`brew install cloudflared`), `signal-cli`
+   (`brew install signal-cli`).
+4. **Cloudflare Access**: `cloudflared access login https://agent-sync.performance-dudes.com`
+   (Browser, GitHub-OAuth; erneuert sich danach ~monatlich selbst).
+5. **signal-cli linken**: `signal-cli link -n "<mac-name>"` (QR mit Handy scannen),
+   `signal-cli listAccounts` prüft.
+6. **Config** `~/.config/pd/agent-sync.json` (Relay legt sie beim ersten
+   `agent-sync start` an): `selfLabel`, `signal.account`, `identity`-Map
+   (UUID→Label). `chmod 600`.
+7. **Session mit Channel-Flag starten**:
+   `claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal`.
+8. **Verifizieren**: beim MCP-Start kommt eine `probe` → `confirm_channel` mit der
+   nonce → `channel:on`. Smoke-Test: `POST http://127.0.0.1:8799/agent/send`.
+
+`AGENT_SYNC_USER_ALLOWLIST` ist serverseitig bewusst leer (Autorisierungsgrenze =
+Cloudflare Access). Architektur, Server-/Relay-Code, Deploy, ADRs: separates Repo
+`performance-dudes/agent-sync`.
 
 ## Things you should NOT do
 

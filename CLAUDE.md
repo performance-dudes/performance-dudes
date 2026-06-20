@@ -7,38 +7,44 @@ You are assisting a Performance Dudes partner, member, or new founder set up the
 - **One command at a time.** Explain what you are about to do, run it, confirm it worked before the next step.
 - **Never do anything that requires a secret in plain text visible to you.** If a passphrase is needed, ask the user to run the script themselves.
 - **Idempotent.** If something is already set up, detect that and skip — don't redo.
-- **Respect role.** Ask who they are up front, then follow the matching path. Don't try to clone repos they don't have access to without checking.
+- **Derive role from GitHub — never ask.** Detect the user via `gh auth status` and their org membership/teams. The user must **not** be asked whether they are founder/partner/member. Clone only repos they actually have access to (verify with `gh`).
 - **Never modify sub-repo folders from here.** Each sub-repo has its own CLAUDE.md and its own rules.
 
-## Identifying the role
+## Determine the role — automatically, do NOT ask
 
-Start by asking:
+The user must never self-declare a role. Derive it from GitHub:
 
-> Welcome to Performance Dudes. What role are you taking here?
->
-> 1. **Founder** — co-owner, full access to all repos, 2-of-2 operations
-> 2. **Partner** — runs own Issuing CA, signs on behalf of PD
-> 3. **Member** — works for a partner, needs a signing certificate
-> 4. **Just exploring** — read-only, no signing setup
->
-> Also: your GitHub username?
+1. `gh auth status` (confirm login); `gh api user -q .login` → their username.
+2. **Founder?** `gh api orgs/performance-dudes/memberships/<user> -q .role` → `admin` = Founder (org owner, full access).
+3. Otherwise team membership: `gh api user/teams -q '.[] | select(.organization.login=="performance-dudes") | .slug'`
+   - in `dudes` → **Dude** (internal team, full working access).
+   - in `partners` → **Partner / customer**.
+   - in neither → **external** (verify only, no setup needed).
 
-Remember the answer. Use it to decide which repos to clone.
+Then welcome them by the derived role (e.g. „Erkenne dich als Dude — richte dein Setup ein.") and proceed. Greet, don't interrogate.
 
-## Repos they need (per role)
+## Repos they need (derived from access)
 
-| Role | Clone these |
+Clone only what the user can access — the derivation above tells you which. Verify
+per repo with `gh repo view performance-dudes/<repo>` if unsure (Org-Basis ist `none`,
+also kommt Zugriff nur über Team-Grants).
+
+| Derived role | Clone these |
 |---|---|
-| Founder | `trust`, `trust-keys`, `orga`, `pd`, `skills-private`, `culture`, `brand` |
-| Partner | `trust`, `trust-keys`, `pd`, `skills-private`, `brand` |
-| Member | `trust`, `pd`, `brand` |
-| Exploring | `trust`, `pd` |
+| Founder (owner) | `trust`, `trust-keys`, `orga`, `pd`, `brand`, `culture`, `agent-sync` |
+| Dude (`dudes`) | `trust`, `pd`, `brand`, `culture`, `agent-sync` |
+| Partner (`partners`) | `trust`, `pd`, `agent-sync` |
+| External | `trust`, `pd` (verify only) |
+
+Plugins kommen **nicht** als geklonte Repos, sondern über User-Scope-Marketplaces
+(siehe „Plugins") — `ai-plugins` / `ai-plugins-enterprise` / `ai-plugins-internal`
+je nach Team-Zugriff.
 
 `brand` is a private repo with ready-to-use brand assets (Teams backgrounds, logos, templates). Brand specs themselves live in the `brand-uix` skill (skills-private), which is the single source of truth.
 
 All repos clone as siblings to this one: `../trust`, `../pd`, etc.
 But since the user is IN this repo when running Claude, clone them INTO this repo's directory (they are gitignored here):
-- `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`, `./skills-private/`, `./culture/`, `./brand/`
+- `./trust/`, `./trust-keys/`, `./orga/`, `./pd/`, `./culture/`, `./brand/`, `./agent-sync/`
 
 ## Plugins
 
@@ -110,7 +116,7 @@ Workspace-Hook (gitleaks + PD-Custom-Patterns) verhindert versehentliche Secret-
 
 ## Clone the sub-repos
 
-For each repo in the user's role list:
+For each repo the user has access to (derived above):
 
 1. **Read the repo's own `CLAUDE.md`** for a `## Setup default` section. That
    section is the authoritative recommendation for how a fresh clone of that
@@ -167,18 +173,18 @@ release tagging. None of those happen without an explicit go-ahead.
 
 ## Setup by role
 
-PKI-Onboarding (key/CSR/Cert, harden-signing) folgt [`pd/README.md`](pd/README.md). Rollen-Differenzen:
+PKI-Onboarding (key/CSR/Cert, harden-signing) folgt [`pd/README.md`](pd/README.md). Pfad ergibt sich aus der oben abgeleiteten Rolle (nicht erfragen):
 
 - **Founder**: signiert eigenen Cert (`issuer` = eigener GitHub-User), nach `pki-issue`-Workflow Cert-PR mergen.
 - **Partner**: gleich wie Founder, aber ein Founder hat vorher `pki-onboard` für die Partner-Issuing-CA gefahren.
-- **Member**: kein `trust-keys`-Zugriff, CSR wird vom Partner mit dessen Issuing CA signiert (Partner oder Founder triggert `pki-issue` mit Partner-Username als `issuer`).
-- **Just exploring**: nur Verify-Pfad, kein Key-Gen (`uv run scripts/verify.py <pdf> --trust ../trust` in `pd/`).
+- **Dude**: kein `trust-keys`-Zugriff, CSR wird von einem Founder (oder Partner) mit dessen Issuing CA signiert (`pki-issue` mit dem Issuer-Username).
+- **External**: nur Verify-Pfad, kein Key-Gen (`uv run scripts/verify.py <pdf> --trust ../trust` in `pd/`).
 
 `harden-signing.sh` führt der Mensch selbst aus (Passphrase, siehe „Things you should NOT do").
 
-## agent-sync channel (optional, für Founder)
+## agent-sync channel (dudes + partners)
 
-Founder können über die geteilte Signal-Gruppe in Claude-Sessions miteinander koordinieren. Setup-Walkthrough liegt im skills-private-Plugin: `skills-private/channels/agent-sync/README.md`. Voraussetzungen: GitHub-Org-Mitgliedschaft, eigenes signal-cli + Signal-Account in der PD-Gruppe, `cloudflared` für die Access-Auth. Architektur, Server- und Relay-Code, ADRs: separates Repo `performance-dudes/agent-sync`.
+Dudes und Partner können über die geteilte Signal-Gruppe in Claude-Sessions koordinieren. Der Kanal ist ein eigenes Plugin `agent-sync@ai-plugins-internal` (User-Scope-Marketplace, pro Projekt enabled — siehe „Plugins"); Setup-Walkthrough liegt im Plugin: `ai-plugins-internal/agent-sync/server/README.md`. Voraussetzungen: GitHub-Org-Mitgliedschaft (Team `dudes`/`partners`), eigenes signal-cli + Signal-Account in der PD-Gruppe, `cloudflared` für die Access-Auth. Start-Flag: `claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal`. Architektur, Server- und Relay-Code, ADRs: separates Repo `performance-dudes/agent-sync`.
 
 ## Things you should NOT do
 

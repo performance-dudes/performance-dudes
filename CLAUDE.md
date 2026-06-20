@@ -81,7 +81,7 @@ typically sees it — `gh repo list` is what actually gates cloning, not this ta
 | Repo | What it is | Typically visible to |
 |---|---|---|
 | `trust` | PKI trust anchors, verify path | everyone with org access |
-| `pd` | signing scripts | dudes, partners, founders |
+| `pd` | signing scripts (⚠️ **deprecated** als Plugin-Marketplace `pd@pd`; Signing migriert nach `ai-plugins`) | dudes, partners, founders |
 | `agent-sync` | channel server/relay/CLI source | dudes, partners, founders |
 | `brand` | ready-to-use brand assets | dudes, founders |
 | `culture` | Culture Engine plugin | dudes, founders |
@@ -92,7 +92,7 @@ Plugins kommen **nicht** als geklonte Repos, sondern über User-Scope-Marketplac
 (siehe „Plugins") — `ai-plugins` / `ai-plugins-enterprise` / `ai-plugins-internal`
 je nach Team-Zugriff.
 
-`brand` is a private repo with ready-to-use brand assets (Teams backgrounds, logos, templates). Brand specs themselves live in the `brand-uix` skill (skills-private), which is the single source of truth.
+`brand` is a private repo with ready-to-use brand assets (Teams backgrounds, logos, templates). Brand specs themselves live in the `brand-uix` skill (currently in `skills-private` — ⚠️ **deprecated**, migrating to `ai-plugins-internal`), which is the single source of truth.
 
 All repos clone as siblings to this one: `../trust`, `../pd`, etc.
 But since the user is IN this repo when running Claude, clone them INTO this repo's directory (they are gitignored here):
@@ -114,8 +114,15 @@ Marketplace-Repos:
 | `ai-plugins-enterprise` | performance-dudes/ai-plugins-enterprise | privat | verkaufbare Produkt-Plugins |
 | `ai-plugins-internal` | performance-dudes/ai-plugins-internal | privat | PD-intern (agent-sync, …) |
 
-Migration aus den Alt-Plugins `pd`/`skills-private` läuft Plugin für Plugin;
-bisher migriert: `agent-sync@ai-plugins-internal`.
+> **Deprecated: `pd` und `skills-private`.** Beide Repos waren die **Alt-Plugin-
+> Marketplaces** (`pd@pd`, `skills-private@skills-private`) und sind **abgekündigt**
+> — abgelöst durch die `ai-plugins*`-Marketplaces oben. Im Workspace sind sie in
+> `.claude/settings.json` auf `false` gesetzt; **neue Arbeit gehört in
+> `ai-plugins-internal` (bzw. `ai-plugins`/`-enterprise`), nicht mehr in
+> `pd`/`skills-private`.** Migration läuft Plugin für Plugin (bisher:
+> `agent-sync@ai-plugins-internal`). Solange eine Fähigkeit noch nicht migriert
+> ist, zeigen einzelne Verweise unten übergangsweise weiter auf `pd`/`skills-private`
+> — das ist Legacy, nicht der Zielzustand.
 
 **Setup (einmal pro Maschine) — Marketplaces im User-Scope registrieren:**
 

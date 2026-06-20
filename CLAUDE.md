@@ -2,39 +2,91 @@
 
 You are assisting a Performance Dudes partner, member, or new founder set up their local workspace. The user has cloned this repo (`performance-dudes/performance-dudes`) and started Claude Code from inside it. Your job: get them fully operational.
 
+**Entry point:** when the user says **"set me up"** (or anything equivalent, or just
+starts a fresh session here), run the **"Set me up" flow** below end-to-end. That
+section is the spine; every other section is a detail it references.
+
 ## Principles
 
 - **One command at a time.** Explain what you are about to do, run it, confirm it worked before the next step.
 - **Never do anything that requires a secret in plain text visible to you.** If a passphrase is needed, ask the user to run the script themselves.
 - **Idempotent.** If something is already set up, detect that and skip — don't redo.
-- **Derive role from GitHub — never ask.** Detect the user via `gh auth status` and their org membership/teams. The user must **not** be asked whether they are founder/partner/member. Clone only repos they actually have access to (verify with `gh`).
+- **Derive access from GitHub — never ask the user to self-declare.** Detect the user via `gh auth status` and list the repos they can actually see (`gh repo list`). Don't ask whether they are founder/partner/member — that label, if it matters at all, follows from access. Clone only repos they actually have access to.
 - **Never modify sub-repo folders from here.** Each sub-repo has its own CLAUDE.md and its own rules.
 
-## Determine the role — automatically, do NOT ask
+## „Set me up" — the end-to-end flow
 
-The user must never self-declare a role. Derive it from GitHub:
+When the user asks to be set up, walk these steps **in order**, one command at a
+time, idempotent (detect-and-skip what's already done), reporting after each. Each
+step links to its detail section below. Do not silently install anything — ask
+first (see „Things you should NOT do").
 
-1. `gh auth status` (confirm login); `gh api user -q .login` → their username.
-2. **Founder?** `gh api orgs/performance-dudes/memberships/<user> -q .role` → `admin` = Founder (org owner, full access).
-3. Otherwise team membership: `gh api user/teams -q '.[] | select(.organization.login=="performance-dudes") | .slug'`
-   - in `dudes` → **Dude** (internal team, full working access).
-   - in `partners` → **Partner / customer**.
-   - in neither → **external** (verify only, no setup needed).
+1. **Identity & accessible repos** — `gh auth status`, then list the PD repos the
+   user can actually see in the org. That access list is the authoritative input —
+   not a role. → [Discover identity & access](#discover-identity--access--what-the-user-can-actually-see)
+2. **Map what to clone** — clone exactly the visible repos; the reference table
+   says what each one is for. → [The PD repos](#the-pd-repos-reference-map)
+3. **Prerequisites** — run the tool checks; install what's missing (ask first).
+   → [Prerequisites check](#prerequisites-check)
+4. **Pre-commit secret gate** — `lefthook install` (+ gitleaks).
+   → [Pre-Commit Secret Prevention](#pre-commit-secret-prevention)
+5. **Plugins** — register the user-scope marketplaces the user can reach; this
+   workspace already enables `agent-sync@ai-plugins-internal` in
+   `.claude/settings.json`; `/reload-plugins`. → [Plugins](#plugins)
+6. **Clone the sub-repos** — clone the visible repos, each following its own
+   `## Setup default`. → [Clone the sub-repos](#clone-the-sub-repos)
+7. **agent-sync — set up AND test** — install + configure its deps (signal-cli,
+   cloudflared), link Signal, write the config, **start Claude with the channel
+   flag** (plain `claude` does NOT carry the channel — see below), start the
+   relay, and **prove it works** (`agent-sync status`/`health` + the probe →
+   `confirm_channel`). → [agent-sync channel](#agent-sync-channel-dudes--partners)
+8. **Hand over** — show the user what they got, the structure, next steps; offer
+   to explain agent-sync; invite questions, anytime. → [Final handover](#final-handover--orientation--offer-to-explain)
 
-Then welcome them by the derived role (e.g. „Erkenne dich als Dude — richte dein Setup ein.") and proceed. Greet, don't interrogate.
+**Not part of standard setup: PKI / signing.** It is set up **on demand**, when the
+user actually needs to sign or issue — never during onboarding. Dudes in
+particular do not need it to get working. → [PKI / signing](#pki--signing--on-demand)
 
-## Repos they need (derived from access)
+Stop and confirm at any step that needs a secret, an install, or a decision the
+user owns. Never merge or sign on their behalf.
 
-Clone only what the user can access — the derivation above tells you which. Verify
-per repo with `gh repo view performance-dudes/<repo>` if unsure (Org-Basis ist `none`,
-also kommt Zugriff nur über Team-Grants).
+## Discover identity & access — what the user can actually see
 
-| Derived role | Clone these |
-|---|---|
-| Founder (owner) | `trust`, `trust-keys`, `orga`, `pd`, `brand`, `culture`, `agent-sync` |
-| Dude (`dudes`) | `trust`, `pd`, `brand`, `culture`, `agent-sync` |
-| Partner (`partners`) | `trust`, `pd`, `agent-sync` |
-| External | `trust`, `pd` (verify only) |
+Setup is driven by **which repos the user can access in the org** — not by a role
+label. „Founder/partner/dude" is at most a friendly description derived from
+access; never a gate, never something the user self-declares. Find the access:
+
+1. `gh auth status`; `gh api user -q .login` → their username.
+2. **List the PD repos they can actually see — this is the authoritative input:**
+   ```bash
+   gh repo list performance-dudes --limit 200 --json name -q '.[].name'
+   ```
+   Org base permission is `none`, so what shows up is exactly what they may clone.
+   Check a single repo with `gh repo view performance-dudes/<repo>` if unsure.
+3. Capabilities follow from access — no classification step:
+   - sees `trust-keys` → can run an Issuing CA (issue certs) — but **on demand**, not now.
+   - sees `pd` → can sign documents; sees only `trust` → verify-only.
+   - reaches the agent-sync channel (org team `dudes`/`partners`, enforced by
+     Cloudflare Access) → set agent-sync up and let the probe confirm. Don't pre-judge it.
+
+Greet by name and by what you found ("you can see trust, pd, brand, culture,
+agent-sync — let's set those up"), not by interrogating a role.
+
+## The PD repos — reference map
+
+Clone exactly the repos step 2 showed as visible; each one follows its own
+`## Setup default`. This table is a **reference** of what each repo is for and who
+typically sees it — `gh repo list` is what actually gates cloning, not this table.
+
+| Repo | What it is | Typically visible to |
+|---|---|---|
+| `trust` | PKI trust anchors, verify path | everyone with org access |
+| `pd` | signing scripts | dudes, partners, founders |
+| `agent-sync` | channel server/relay/CLI source | dudes, partners, founders |
+| `brand` | ready-to-use brand assets | dudes, founders |
+| `culture` | Culture Engine plugin | dudes, founders |
+| `orga` | internal strategy/projects | founders |
+| `trust-keys` | Issuing-CA private material | founders, partners (own CA) |
 
 Plugins kommen **nicht** als geklonte Repos, sondern über User-Scope-Marketplaces
 (siehe „Plugins") — `ai-plugins` / `ai-plugins-enterprise` / `ai-plugins-internal`
@@ -108,6 +160,10 @@ If any are missing:
 - `openssl`: usually pre-installed on macOS
 - `lefthook` + `gitleaks`: `brew install lefthook gitleaks` (siehe „Pre-Commit Secret Prevention" unten)
 
+For **agent-sync** (dudes + partners) two more tools are needed — installed and
+configured in the agent-sync step, not here: `signal-cli` and `cloudflared`
+(`brew install signal-cli cloudflared`). Node ≥ 20 is also required for the relay.
+
 Run them via the Bash tool and report back.
 
 ## Pre-Commit Secret Prevention
@@ -171,14 +227,20 @@ The same rule applies to follow-up actions that are easy to confuse with
 "finishing the PR": branch deletion, force-pushes that rewrite shared history,
 release tagging. None of those happen without an explicit go-ahead.
 
-## Setup by role
+## PKI / signing — on demand
 
-PKI-Onboarding (key/CSR/Cert, harden-signing) folgt [`pd/README.md`](pd/README.md). Pfad ergibt sich aus der oben abgeleiteten Rolle (nicht erfragen):
+**Not a standard onboarding step.** Set this up only when the user actually needs
+to sign a document or issue a cert — most people (especially dudes) get fully
+working without it. The path follows from **access**, not a title
+([`pd/README.md`](pd/README.md)):
 
-- **Founder**: signiert eigenen Cert (`issuer` = eigener GitHub-User), nach `pki-issue`-Workflow Cert-PR mergen.
-- **Partner**: gleich wie Founder, aber ein Founder hat vorher `pki-onboard` für die Partner-Issuing-CA gefahren.
-- **Dude**: kein `trust-keys`-Zugriff, CSR wird von einem Founder (oder Partner) mit dessen Issuing CA signiert (`pki-issue` mit dem Issuer-Username).
-- **External**: nur Verify-Pfad, kein Key-Gen (`uv run scripts/verify.py <pdf> --trust ../trust` in `pd/`).
+- **sees `trust-keys`** (own Issuing CA): signs its own cert (`issuer` = own GitHub
+  user), then merges the cert-PR from the `pki-issue` workflow. (A partner's CA is
+  bootstrapped once by a founder via `pki-onboard`.)
+- **sees `pd` but not `trust-keys`**: generates a key + CSR; an issuer (someone with
+  `trust-keys`) signs it via `pki-issue` with their issuer username.
+- **sees only `trust`**: verify-only, no key-gen
+  (`uv run scripts/verify.py <pdf> --trust ../trust` in `pd/`).
 
 `harden-signing.sh` führt der Mensch selbst aus (Passphrase, siehe „Things you should NOT do").
 
@@ -202,17 +264,65 @@ Onboarding-Checkliste:
    (Browser, GitHub-OAuth; erneuert sich danach ~monatlich selbst).
 5. **signal-cli linken**: `signal-cli link -n "<mac-name>"` (QR mit Handy scannen),
    `signal-cli listAccounts` prüft.
-6. **Config** `~/.config/pd/agent-sync.json` (Relay legt sie beim ersten
-   `agent-sync start` an): `selfLabel`, `signal.account`, `identity`-Map
-   (UUID→Label). `chmod 600`.
-7. **Session mit Channel-Flag starten**:
-   `claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal`.
-8. **Verifizieren**: beim MCP-Start kommt eine `probe` → `confirm_channel` mit der
-   nonce → `channel:on`. Smoke-Test: `POST http://127.0.0.1:8799/agent/send`.
+6. **Config** `~/.config/agent-sync/settings.json` — **Claude richtet sie ein und
+   fragt den User nach allem, was nicht automatisch ableitbar ist.** Vorgehen:
+   - `agent-sync start` legt beim ersten Lauf ein Skelett an und füllt
+     `signal.account` automatisch aus `signal-cli listAccounts`.
+   - Den Rest setzt Claude **entweder über die CLI-Setter** (bevorzugt, validiert):
+     - `agent-sync label <handle>` → `selfLabel` (dein Channel-Handle, z. B. `felix` —
+       frag den User danach).
+     - `agent-sync remote https://agent-sync.performance-dudes.com` → Remote-Server.
+     - `agent-sync cf on` → Cloudflare Access aktivieren.
+   - **oder** Claude editiert `settings.json` direkt und fragt den User nach den
+     fehlenden Werten — vor allem die `identity`-Map (Teammitglied-UUID → Label),
+     die nicht automatisch entsteht.
+   - `agent-sync config` zeigt jederzeit die **effektive** Config (read-only) zur
+     Kontrolle. Danach `chmod 600 ~/.config/agent-sync/settings.json`.
+   Frag den User Schritt für Schritt nach `selfLabel` und den `identity`-Einträgen;
+   setze den Rest aus den bekannten Defaults. Niemals raten — nachfragen.
+7. **Session mit Channel-Flag starten** — **plain `claude` reicht NICHT**: der
+   Push-Channel kommt nur, wenn Claude mit dem development-channels-Flag startet:
+   ```bash
+   claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal
+   ```
+   Empfehlung: dauerhaften Alias in `~/.zshrc` anlegen, damit das nicht vergessen wird:
+   ```bash
+   alias pd-claude='claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal'
+   ```
+   Ohne das Flag laufen Sessions normal, aber `agent-sync status` zeigt sie als
+   `channel:off` — sie empfangen keine Push-Nachrichten.
+8. **Relay starten + verifizieren**: `agent-sync start` (legt beim ersten Start die
+   Config an, startet den Relay). Dann **beweisen, dass es läuft**:
+   `agent-sync status` (deine Session sollte erscheinen) und `agent-sync health`
+   (Relay UP, signal/remote). Beim MCP-Start kommt zudem eine `probe` →
+   `confirm_channel` mit der nonce → `channel:on`.
 
 `AGENT_SYNC_USER_ALLOWLIST` ist serverseitig bewusst leer (Autorisierungsgrenze =
 Cloudflare Access). Architektur, Server-/Relay-Code, Deploy, ADRs: separates Repo
 `performance-dudes/agent-sync`.
+
+## Final handover — orientation + offer to explain
+
+When setup is done, don't just stop — orient the user. Give a short, friendly
+wrap-up (adapt to what they actually got):
+
+- **What you now have** — list the cloned repos with a one-line each, the active
+  plugins (`agent-sync@ai-plugins-internal`, plus any the user's access reached), and the
+  agent-sync channel status (`channel:on`? relay up?).
+- **The structure** — everything is a sibling inside this workspace folder
+  (`./trust/`, `./pd/`, `./agent-sync/`, …), each repo with its own `CLAUDE.md` and
+  rules. This repo is the workspace meta-repo.
+- **Next steps** — e.g. start sessions with the channel alias (`pd-claude`), try
+  `agent-sync status`, and that PKI/signing is there **when you need it** (on demand).
+- **Offer to explain agent-sync** — proactively offer a short walkthrough: how the
+  channel works (agent↔agent + Signal), `@group` vs topics vs `label::name`, how to
+  see who's working on what, and the collaboration skills (brainstorming, pairing,
+  feedback-and-culture, mentoring). Point to the `agent-sync-usage` skill and
+  `agent-sync/docs/collaboration.md`.
+- **Invite questions, anytime** — make explicit that they can ask anything about the
+  setup, the repos, or agent-sync at any point, now or later.
+
+Keep it brief and welcoming — a map and an open door, not a wall of text.
 
 ## Things you should NOT do
 

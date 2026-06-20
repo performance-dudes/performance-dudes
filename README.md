@@ -18,9 +18,9 @@ claude
 
 Then in Claude Code:
 
-> Set me up as a new Performance Dudes partner (or member, or founder).
+> Set me up.
 
-Claude reads [CLAUDE.md](CLAUDE.md) and walks you through everything.
+Claude reads [CLAUDE.md](CLAUDE.md), detects who you are from GitHub, and walks you through everything. You never pick a role.
 
 ## The repo landscape
 
@@ -32,14 +32,15 @@ Claude reads [CLAUDE.md](CLAUDE.md) and walks you through everything.
 | [`performance-dudes/trust-keys`](https://github.com/performance-dudes/trust-keys) | private | Encrypted CA key audit trail (founders + partners) |
 | [`performance-dudes/orga`](https://github.com/performance-dudes/orga) | private | Strategy, decisions, concepts (founders) |
 
-## Roles
+## Roles — derived from GitHub, not asked
 
-- **Founder** — full access. Root CA ceremonies, 2-of-2 operations, partner onboarding.
-- **Partner** — operates their own Issuing CA. Signs on behalf of Performance Dudes. Can issue certs to their team.
-- **Member** — works for a partner. Has a personal signing certificate, signs documents.
-- **Customer / external** — just verifies signatures. Needs no setup at all — public certs in `trust/` are enough.
+You never declare a role. Claude detects your GitHub identity and org team
+membership (owner / `dudes` / `partners`) and sets up exactly what you can access.
 
-Claude picks the right setup path based on your role.
+- **Founder** (org owner) — full access. Root CA ceremonies, 2-of-2 operations, partner onboarding.
+- **Dude** (`dudes` team) — internal team. Personal signing certificate, full working access.
+- **Partner** (`partners` team) — operates their own Issuing CA. Signs on behalf of Performance Dudes. Can issue certs to their team.
+- **External / customer** — just verifies signatures. Needs no setup at all — public certs in `trust/` are enough.
 
 ## Layout after setup
 

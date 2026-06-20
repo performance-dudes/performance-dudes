@@ -42,23 +42,44 @@ But since the user is IN this repo when running Claude, clone them INTO this rep
 
 ## Plugins
 
-This workspace ships with two Claude Code plugins declared in `.claude/settings.json`:
+Claude-Code-Plugins kommen aus **Marketplace-Repos**. Modell: **Marketplace
+einmal im User-Scope registrieren** (`~/.claude/settings.json` →
+`extraKnownMarketplaces`, github source — maschinenweit, Code wird einmal
+gecached), **Plugin pro Projekt enablen** (`<projekt>/.claude/settings.json` →
+`enabledPlugins`, Eintrag `plugin@marketplace`).
 
-| Plugin | Repo | Visibility | Content |
-|--------|------|------------|---------|
-| `pd` | performance-dudes/pd | Public | Document signing, trust infrastructure |
-| `skills-private` | performance-dudes/skills-private | Private | Brand, proposals, workflow automation |
+Marketplace-Repos:
 
-Both are installed from local clones (not remote). After cloning the sub-repos, register and install:
+| Marketplace | Repo | Sichtbarkeit | Inhalt |
+|---|---|---|---|
+| `ai-plugins` | performance-dudes/ai-plugins | public | generische Infra (signing, workspace) |
+| `ai-plugins-enterprise` | performance-dudes/ai-plugins-enterprise | privat | verkaufbare Produkt-Plugins |
+| `ai-plugins-internal` | performance-dudes/ai-plugins-internal | privat | PD-intern (agent-sync, …) |
+
+Migration aus den Alt-Plugins `pd`/`skills-private` läuft Plugin für Plugin;
+bisher migriert: `agent-sync@ai-plugins-internal`.
+
+**Setup (einmal pro Maschine) — Marketplaces im User-Scope registrieren:**
 
 ```bash
-claude plugin marketplace add ./pd
-claude plugin install pd
-claude plugin marketplace add ./skills-private
-claude plugin install skills-private
+claude plugin marketplace add performance-dudes/ai-plugins
+claude plugin marketplace add performance-dudes/ai-plugins-internal
+claude plugin marketplace add performance-dudes/ai-plugins-enterprise   # nur mit Zugriff
 ```
 
-Run `/reload-plugins` to activate. The `skills-private` repo requires org membership (private).
+Das landet in `~/.claude/settings.json` (`extraKnownMarketplaces`, github source)
+— nicht pro Projekt, sondern einmal für alle. Private Marketplaces brauchen
+Org-Mitgliedschaft (Team `dudes`/`partners`).
+
+Welche Plugins **in diesem Workspace** aktiv sind, steht in
+`<workspace>/.claude/settings.json` (`enabledPlugins`), z.B.:
+
+```json
+{ "enabledPlugins": { "agent-sync@ai-plugins-internal": true } }
+```
+
+`/reload-plugins` aktiviert. Plugins mit eigenem MCP-Server (z.B. `agent-sync`)
+bringen ihre `.mcp.json` selbst mit — kein manuelles Wiring nötig.
 
 ## Prerequisites check
 

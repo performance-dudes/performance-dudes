@@ -1,20 +1,7 @@
 {
   "enabledPlugins": {
-    "pd@pd": true,
-    "skills-private@skills-private": true
-  },
-  "extraKnownMarketplaces": {
-    "pd": {
-      "source": {
-        "source": "directory",
-        "path": "./pd"
-      }
-    },
-    "skills-private": {
-      "source": {
-        "source": "directory",
-        "path": "./skills-private"
-      }
-    }
+    "pd@pd": false,
+    "skills-private@skills-private": false,
+    "agent-sync@ai-plugins-internal": true
   }
 }

@@ -271,7 +271,7 @@ Onboarding-Checkliste:
    ```
    Am besten als dauerhaften Alias in `~/.zshrc`:
    ```bash
-   alias pd-claude='claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal'
+   alias cl='claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal'
    ```
 8. **Relay starten + verifizieren**: `agent-sync start` (legt beim ersten Start die
    Config an, startet den Relay). Dann **beweisen, dass es läuft**:
@@ -294,7 +294,7 @@ wrap-up (adapt to what they actually got):
 - **The structure** — everything is a sibling inside this workspace folder
   (`./trust/`, `./pd/`, `./agent-sync/`, …), each repo with its own `CLAUDE.md` and
   rules. This repo is the workspace meta-repo.
-- **Next steps** — e.g. start sessions with the channel alias (`pd-claude`), try
+- **Next steps** — e.g. start sessions with the channel alias (`cl`), try
   `agent-sync status`, and that PKI/signing is there **when you need it** (on demand).
 - **Offer to explain agent-sync** — proactively offer a short walkthrough: how the
   channel works (agent↔agent + Signal), `@group` vs topics vs `label::name`, how to

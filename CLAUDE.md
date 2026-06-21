@@ -264,15 +264,13 @@ Onboarding-Checkliste:
      Kontrolle. Danach `chmod 600 ~/.config/agent-sync/settings.json`.
    Frag den User Schritt für Schritt nach `selfLabel` und den `identity`-Einträgen;
    setze den Rest aus den bekannten Defaults. Niemals raten — nachfragen.
-7. **Session mit Channel-Flag starten** — der Push-Channel braucht das
-   development-channels-Flag:
-   ```bash
-   claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal
-   ```
-   Am besten als dauerhaften Alias in `~/.zshrc`:
+7. **Claude mit dem Channel-Flag starten** — der Push-Channel braucht das
+   development-channels-Flag. Leg dir **`cl` als deinen Claude-Alias** an
+   (`~/.zshrc`), dann startest du Claude immer mit Channel:
    ```bash
    alias cl='claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal'
    ```
+   Ab dann einfach `cl` statt `claude`.
 8. **Relay starten + verifizieren**: `agent-sync start` (legt beim ersten Start die
    Config an, startet den Relay). Dann **beweisen, dass es läuft**:
    `agent-sync status` (deine Session sollte erscheinen) und `agent-sync health`
@@ -294,7 +292,7 @@ wrap-up (adapt to what they actually got):
 - **The structure** — everything is a sibling inside this workspace folder
   (`./trust/`, `./pd/`, `./agent-sync/`, …), each repo with its own `CLAUDE.md` and
   rules. This repo is the workspace meta-repo.
-- **Next steps** — e.g. start sessions with the channel alias (`cl`), try
+- **Next steps** — e.g. start Claude with your `cl` alias (Claude + channel), try
   `agent-sync status`, and that PKI/signing is there **when you need it** (on demand).
 - **Offer to explain agent-sync** — proactively offer a short walkthrough: how the
   channel works (agent↔agent + Signal), `@group` vs topics vs `label::name`, how to

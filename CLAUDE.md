@@ -76,7 +76,8 @@ access sees them):
 | `performance-dudes` | this workspace base repo (you're already in it) |
 | `trust` | PKI trust anchors + verify path |
 | `pd` | document signing scripts |
-| `ai-plugins` | public Claude-Code plugins — a **marketplace**, not cloned (see „Plugins") |
+| `ai-plugins` | public Claude-Code plugins — a **marketplace**, registered not cloned (see „Plugins") |
+| `website` | the Performance Dudes website |
 
 Everything **else** the user sees in `gh repo list` is private and **varies per
 person**. Don't assume which private repos exist; clone whatever the list shows

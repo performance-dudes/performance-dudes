@@ -43,10 +43,6 @@ first (see „Things you should NOT do").
 8. **Hand over** — show the user what they got, the structure, next steps; offer
    to explain agent-sync; invite questions, anytime. → [Final handover](#final-handover--orientation--offer-to-explain)
 
-**Not part of standard setup: PKI / signing.** It is set up **on demand**, when the
-user actually needs to sign or issue — never during onboarding. Most people do
-not need it to get working. → [PKI / signing](#pki--signing--on-demand)
-
 Stop and confirm at any step that needs a secret, an install, or a decision the
 user owns. Never merge or sign on their behalf.
 
@@ -61,14 +57,11 @@ Setup is driven entirely by **which repos the user can see in the org**. Find th
    ```
    Org base permission is `none`, so what shows up is exactly what they may clone.
    Check a single repo with `gh repo view performance-dudes/<repo>` if unsure.
-3. What someone can do follows from what they can see — no roles, no classification:
-   - sees `trust-keys` → can run an Issuing CA (issue certs) — but **on demand**, not now.
-   - sees `pd` → can sign documents; sees only `trust` → verify-only.
-   - reaches the agent-sync channel (org membership gates it via Cloudflare Access)
-     → set agent-sync up and let the probe confirm. Don't pre-judge it.
+3. What someone can do follows from what they can see — no roles, no classification.
+   Clone what's there and read each repo's own `CLAUDE.md` for the rest.
 
 Greet by name and by what you found ("you can see these repos — let's set those
-up"), never by interrogating or assigning a role.
+up").
 
 ## The PD repos
 
@@ -82,19 +75,17 @@ access sees them):
 |---|---|
 | `performance-dudes` | this workspace base repo (you're already in it) |
 | `trust` | PKI trust anchors + verify path |
-| `pd` | document signing scripts (⚠️ **deprecated** as the plugin marketplace `pd@pd`; signing is migrating to `ai-plugins`) |
-| `ai-plugins` | public Claude-Code plugins (signing, workspace infra) — a **marketplace**, not cloned (see „Plugins") |
-| `website` | the PD website (not part of workspace setup) |
+| `pd` | document signing scripts |
+| `ai-plugins` | public Claude-Code plugins — a **marketplace**, not cloned (see „Plugins") |
 
 Everything **else** the user sees in `gh repo list` is private and **varies per
-person** — e.g. internal tooling, the agent-sync channel source, brand assets,
-strategy. Don't assume which private repos exist; clone whatever the list shows
+person**. Don't assume which private repos exist; clone whatever the list shows
 and read each one's `CLAUDE.md`. (Plugins like `agent-sync@ai-plugins-internal`
 come via marketplaces, not as clones — see „Plugins".)
 
 Clone everything as a sibling **inside** this repo's directory (they are
 gitignored here): `./<repo>/` for each repo from the list, e.g. `./trust/`,
-`./pd/`, `./agent-sync/`.
+`./pd/`.
 
 ## Plugins
 
@@ -232,22 +223,11 @@ The same rule applies to follow-up actions that are easy to confuse with
 "finishing the PR": branch deletion, force-pushes that rewrite shared history,
 release tagging. None of those happen without an explicit go-ahead.
 
-## PKI / signing — on demand
+## Signing
 
-**Not a standard onboarding step.** Set this up only when the user actually needs
-to sign a document or issue a cert — most people get fully working without it.
-The path follows from **what the user can access**
-([`pd/README.md`](pd/README.md)):
-
-- **sees `trust-keys`** (runs an Issuing CA): signs its own cert (`issuer` = own
-  GitHub user), then merges the cert-PR from the `pki-issue` workflow. (A new
-  Issuing CA is bootstrapped once via `pki-onboard` by someone who already runs one.)
-- **sees `pd` but not `trust-keys`**: generates a key + CSR; an issuer (someone with
-  `trust-keys`) signs it via `pki-issue` with their issuer username.
-- **sees only `trust`**: verify-only, no key-gen
-  (`uv run scripts/verify.py <pdf> --trust ../trust` in `pd/`).
-
-`harden-signing.sh` führt der Mensch selbst aus (Passphrase, siehe „Things you should NOT do").
+When the user wants to sign a document or issue a certificate, follow
+[`pd/README.md`](pd/README.md). `harden-signing.sh` führt der Mensch selbst aus
+(Passphrase, siehe „Things you should NOT do").
 
 ## agent-sync channel
 
@@ -260,8 +240,7 @@ Onboarding-Checkliste:
 1. **Marketplace + Plugin** (siehe „Plugins"): `ai-plugins-internal` im User-Scope
    registriert, `agent-sync@ai-plugins-internal` im Workspace enabled.
 2. **Voraussetzungen**: GitHub-Org-Mitgliedschaft (lässt Cloudflare Access durch)
-   **und** Signal-Account in der „Performance-Dudes"-Gruppe. Ohne 1. → jeder
-   API-Call 401/403; ohne 2. → Receive-Pfad verwirft still.
+   **und** Signal-Account in der „Performance-Dudes"-Gruppe.
 3. **Tools**: `node` ≥ 20, `cloudflared` (`brew install cloudflared`), `signal-cli`
    (`brew install signal-cli`).
 4. **Cloudflare Access**: `cloudflared access login https://agent-sync.performance-dudes.com`
@@ -284,17 +263,15 @@ Onboarding-Checkliste:
      Kontrolle. Danach `chmod 600 ~/.config/agent-sync/settings.json`.
    Frag den User Schritt für Schritt nach `selfLabel` und den `identity`-Einträgen;
    setze den Rest aus den bekannten Defaults. Niemals raten — nachfragen.
-7. **Session mit Channel-Flag starten** — **plain `claude` reicht NICHT**: der
-   Push-Channel kommt nur, wenn Claude mit dem development-channels-Flag startet:
+7. **Session mit Channel-Flag starten** — der Push-Channel braucht das
+   development-channels-Flag:
    ```bash
    claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal
    ```
-   Empfehlung: dauerhaften Alias in `~/.zshrc` anlegen, damit das nicht vergessen wird:
+   Am besten als dauerhaften Alias in `~/.zshrc`:
    ```bash
    alias pd-claude='claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal'
    ```
-   Ohne das Flag laufen Sessions normal, aber `agent-sync status` zeigt sie als
-   `channel:off` — sie empfangen keine Push-Nachrichten.
 8. **Relay starten + verifizieren**: `agent-sync start` (legt beim ersten Start die
    Config an, startet den Relay). Dann **beweisen, dass es läuft**:
    `agent-sync status` (deine Session sollte erscheinen) und `agent-sync health`
@@ -338,16 +315,6 @@ Keep it brief and welcoming — a map and an open door, not a wall of text.
 ## German language
 
 In allen tracked Files dieses Repos und der Sub-Repos: echte Umlaute (`ä`, `ö`, `ü`, `Ä`, `Ö`, `Ü`, `ß`) statt ASCII-Ersatzschreibung (`ae`, `oe`, `ue`, `ss`). Gilt für Doku, Specs, Commit-Messages, PR-Bodies. Englische Fachbegriffe und Eigennamen bleiben unverändert (Maven, Auto-Merge, false). Wenn ein bestehendes Dokument ASCII-Schreibweise nutzt, im Rahmen einer regulären Änderung mit-fixen.
-
-## Path conventions in shared docs
-
-When writing in any tracked file of `performance-dudes/*` (this repo, orga, companions like be-plus, ...), refer to locations relative to the PD workspace root, not to a home directory. Use:
-
-- `<pd-workspace>/<account>/` for companion paths
-- `<companion>/<repo>/` for client-code clones inside a companion
-- `../<sibling>/` for cross-references between sub-repos at the same level
-
-`~/work/` and other home-directory paths are local to one user and must not appear in shared docs. Authority: `orga/decisions/2026-05-07-companion-workspace-location.md`.
 
 ## Commits
 

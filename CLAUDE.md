@@ -38,7 +38,7 @@ first (see „Things you should NOT do").
 7. **agent-sync — set up AND test** — install + configure its deps (signal-cli,
    cloudflared), link Signal, write the config, **start Claude with the channel
    flag** (plain `claude` does NOT carry the channel — see below), start the
-   relay, and **prove it works** (`agent-sync status`/`health` + the probe →
+   relay, and **prove it works** (`agent-sync status` + the probe →
    `confirm_channel`). → [agent-sync channel](#agent-sync-channel)
 8. **Hand over** — show the user what they got, the structure, next steps; offer
    to explain agent-sync; invite questions, anytime. → [Final handover](#final-handover--orientation--offer-to-explain)
@@ -272,10 +272,10 @@ Onboarding-Checkliste:
    ```
    Ab dann einfach `cl` statt `claude`.
 8. **Relay starten + verifizieren**: `agent-sync start` (legt beim ersten Start die
-   Config an, startet den Relay). Dann **beweisen, dass es läuft**:
-   `agent-sync status` (deine Session sollte erscheinen) und `agent-sync health`
-   (Relay UP, signal/remote). Beim MCP-Start kommt zudem eine `probe` →
-   `confirm_channel` mit der nonce → `channel:on`.
+   Config an, startet den Relay). Dann **beweisen, dass es läuft**: `agent-sync
+   status` zeigt alles — Relay UP, signal/remote, deine Session, Channel/Flag.
+   Beim MCP-Start kommt zudem eine `probe` → `confirm_channel` mit der nonce →
+   `channel:on`.
 
 `AGENT_SYNC_USER_ALLOWLIST` ist serverseitig bewusst leer (Autorisierungsgrenze =
 Cloudflare Access). Architektur, Server-/Relay-Code, Deploy, ADRs: separates Repo

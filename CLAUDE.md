@@ -285,6 +285,11 @@ Onboarding-Checkliste:
    Beim MCP-Start kommt zudem eine `probe` → `confirm_channel` mit der nonce →
    `channel:on`.
 
+**Self-Update:** der Relay hält sich selbst aktuell — `agent-sync start` zieht
+vorher die zum Server passende Version (Config `autoUpdate`, **Default on**). Du
+musst nichts pullen. Manuell: `agent-sync update`; abschalten:
+`agent-sync autoupdate off`. Details: `agent-sync/CLAUDE.md` → „Versionen & Update".
+
 `AGENT_SYNC_USER_ALLOWLIST` ist serverseitig bewusst leer (Autorisierungsgrenze =
 Cloudflare Access). Architektur, Server-/Relay-Code, Deploy, ADRs: separates Repo
 `performance-dudes/agent-sync`.

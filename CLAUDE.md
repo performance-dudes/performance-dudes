@@ -30,9 +30,12 @@ first (see „Things you should NOT do").
    → [Prerequisites check](#prerequisites-check)
 4. **Pre-commit secret gate** — `lefthook install` (+ gitleaks).
    → [Pre-Commit Secret Prevention](#pre-commit-secret-prevention)
-5. **Plugins** — register the user-scope marketplaces the user can reach; this
-   workspace already enables `agent-sync@ai-plugins-internal` in
-   `.claude/settings.json`; `/reload-plugins`. → [Plugins](#plugins)
+5. **Plugins** — register the user-scope marketplaces the user can reach; the
+   workspace root enables `agent-sync@ai-plugins-internal` in
+   `performance-dudes/.claude/settings.json`, and each sub-repo enables it in its
+   own `<repo>/.claude/settings.json` (z.B. `be-plus/.claude/settings.json`) —
+   Settings werden **nicht** aus Eltern-Verzeichnissen vererbt; `/reload-plugins`.
+   → [Plugins](#plugins)
 6. **Clone the sub-repos** — clone the visible repos, each following its own
    `## Setup default`. → [Clone the sub-repos](#clone-the-sub-repos)
 7. **agent-sync — set up AND test** — install + configure its deps (signal-cli,
@@ -126,8 +129,13 @@ Das landet in `~/.claude/settings.json` (`extraKnownMarketplaces`, github source
 — nicht pro Projekt, sondern einmal für alle. Private Marketplaces brauchen
 GitHub-Org-Mitgliedschaft (wer keinen Zugriff hat, sieht sie schlicht nicht).
 
-Welche Plugins **in diesem Workspace** aktiv sind, steht in
-`<workspace>/.claude/settings.json` (`enabledPlugins`), z.B.:
+Welche Plugins in einem Projekt aktiv sind, steht in dessen **eigenem**
+`<projekt-root>/.claude/settings.json` (`enabledPlugins`) — die Workspace-Wurzel
+in `performance-dudes/.claude/settings.json`, ein Sub-Repo in
+`be-plus/.claude/settings.json`. Es gibt **keine Vererbung aus
+Eltern-Verzeichnissen**: startet Claude in `be-plus/`, liest es nur
+`be-plus/.claude/…` plus das User-Scope `~/.claude/settings.json`, nicht das
+`.claude/settings.json` des Eltern-Workspace. Beispiel:
 
 ```json
 { "enabledPlugins": { "agent-sync@ai-plugins-internal": true } }

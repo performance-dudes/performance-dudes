@@ -2,6 +2,8 @@
   "enabledPlugins": {
     "pd@pd": false,
     "skills-private@skills-private": false,
-    "agent-sync@ai-plugins-internal": true
+    "agent-sync@ai-plugins-internal": true,
+    "knowledge@ai-plugins-internal": true,
+    "craft@ai-plugins-internal": true
   }
 }

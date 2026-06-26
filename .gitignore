@@ -36,6 +36,15 @@ ai-plugins/
 ai-plugins-internal/
 ai-plugins-enterprise/
 
+# Research-/Testlauf-Workspace (kein Sub-Repo, nur lokale Recherche)
+holunder/
+
+# Produkt-Repo RunWay (performance-dudes/runway, eigenes Git-Repo)
+runway/
+
+# Elastocor-Workspace (eigenes Git-Repo, eigene Projekte)
+elastocor/
+
 # Local scratch
 scratch/
 tmp/

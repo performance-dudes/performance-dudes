@@ -1,6 +1,6 @@
-# Performance Dudes — One-Pager
+# Performance Dudes — Überblick
 
-**Wer wir sind und was wir anbieten. Auf einer Seite.**
+**Wer wir sind und was wir anbieten.**
 
 ---
 

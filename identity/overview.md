@@ -1,92 +1,71 @@
-# Performance Dudes — Überblick
+# Performance Dudes
 
-**Wer wir sind und was wir anbieten.**
+**AI-Native Software Engineering**
+
+_Build **fast**. Enable. Leave._
 
 ---
 
-## Wer wir sind
+## Der Pilot, der nicht in Produktion kommt
 
-Performance Dudes ist ein **Kollektiv unabhängiger Entwickler und Berater**, die
-sich für Kundenprojekte als ein professionelles Team zusammenfinden. Verbindendes
-Element: **AI-beschleunigte Arbeit** — nicht nur im Code, sondern über alle Ebenen
-einer Organisation. Keine klassische Agentur, keine Rollen-Hierarchie — geteilte
-Standards, gemeinsame Haltung, ein konsistentes Auftreten zum Kunden.
+Die meisten KI-Initiativen bleiben im Pilot stecken. Rund 73 Prozent der
+Initiativen im DACH-Raum schaffen den Sprung in die Produktion nicht.
 
-Wir bauen nicht nur. Wir **befähigen**. Jedes Engagement lässt die Organisation
-eigenständiger zurück, als wir sie vorgefunden haben.
+Der Grund ist selten die Technik. Das Wissen steckt in Köpfen, nicht im System.
+Prozesse sind ungeschrieben, der Kontext ist verstreut. Ein Pilot läuft kurz,
+dann bleibt er liegen, weil niemand ihn ohne die Leute betreiben kann, die ihn
+gebaut haben.
 
-> Wir sind nicht hier, um Menschen zu ersetzen. Wir sind hier, um sie
-> unaufhaltbar zu machen.
+## RunWay: euer Betriebssystem für die AI-native Organisation
 
-## Warum es uns gibt
+_„Run your work with AI."_ Ihr installiert RunWay und bekommt nicht nur
+Werkzeuge, sondern die Praktiken, Prozesse und das Wissen, mit denen Mensch und
+Agent zusammenarbeiten. Auf allen Ebenen, vom Management bis zum Vertrieb.
 
-AI-gestützte Arbeit wird zum Standard — die meisten Organisationen sind dafür aber
-nicht bereit. Wissen steckt in Köpfen statt im System, Prozesse sind ungeschrieben,
-Kontext ist verstreut. Pilotprojekte bleiben im Pilot stecken: rund **73 % der
-DACH-Initiativen** schaffen den Sprung in die Produktion nicht.
+Was Berater als „agentisches Operating Model" auf Folien zeigen, läuft bei euch
+als laufendes System.
 
-Was Berater (McKinsey, EY & Co.) als „agentisches Operating Model" auf Slides
-beschreiben, fehlt als **laufendes System**. Genau diese Lücke schließen wir.
-
-## RunWay — unser Produkt
-
-**RunWay ist das Betriebssystem für die AI-native Organisation** — _„Run your work
-with AI"_. Eine Firma installiert RunWay und bekommt nicht nur Werkzeuge, sondern
-die **Praktiken, Prozesse und das Wissen**, mit denen Mensch und Agent auf allen
-Ebenen zusammenarbeiten — vom C-Level bis zum Vertrieb.
-
-Was uns abhebt:
-
-- **Produkt statt Slide** — das Operating Model läuft als Tooling, Prozess und Wissen, nicht als Foliensatz.
-- **Cross-funktional statt dev-only** — Coding-Agenten enden am Code; RunWay geht über alle Ebenen.
-- **Enablement statt Lock-in** — RunWay befähigt die Organisation, eigenständig zu arbeiten. Offene Basis, kein Vendor-Lock-in.
-- **Lokal-first** — Daten bleiben im Haus. Entscheidend für EU AI Act, regulierte Branchen und den Mittelstand.
-
-### Was RunWay liefert
-
-| Ebene | Was RunWay bringt |
+| Ebene | Was ihr bekommt |
 |---|---|
-| **C-Level / Mgmt** | Operating Model, Entscheidungsrechte, KI-Governance, Wirkungsmessung |
-| **Produkt** | Spec-driven Planung — vom Bedarf zur ausführbaren Spec |
-| **Entwicklung** | AI-Ready-Substrat, Vibe Engineering, Quality Gates |
-| **QA** | Verifikation als Schichtmodell statt Vertrauensfrage |
-| **Betrieb / Ops** | Agenten im Deploy- und Betriebsfluss, Runbooks |
+| **Management** | Operating Model, Entscheidungsrechte, KI-Governance, Wirkungsmessung |
+| **Produkt** | Planung von der Idee zur ausführbaren Spezifikation |
+| **Entwicklung** | Codebasis, in der AI-Agenten sofort mitarbeiten. Quality Gates |
+| **QA** | Verifikation als Schichtmodell, nicht als Vertrauensfrage |
+| **Betrieb** | Agenten im Deploy- und Betriebsfluss, Runbooks |
 | **Marketing & Vertrieb** | Agenten-gestützte Content-, Angebots- und Account-Workflows |
 
-**Roger** ist das Cockpit für die nicht-technischen Stakeholder: das Produkt
-steuern und Feedback als strukturierte Issues einbringen — ohne eine Zeile Code.
+Drei Eigenschaften, die zählen:
 
-## Was wir anbieten — drei ineinandergreifende Erlösquellen
+- **Lokal-first.** Eure Daten bleiben im Haus. Wichtig für den EU AI Act und regulierte Branchen.
+- **Kein Lock-in.** Offene Basis. RunWay befähigt euer Team, eigenständig zu arbeiten.
+- **Cross-funktional.** Coding-Agenten enden am Code. RunWay geht über alle Ebenen.
 
-1. **RunWay-Lizenz** (Produkt, jährlich, wiederkehrend) — der Hebel, der aus der
-   Tagessatz-Falle holt. Wert aus gebündeltem Wissen, nicht aus abgesessener Zeit.
-   Gestaffelt nach Größe und genutzten Ebenen/Modulen.
-2. **Beratung** (T&M) — Strategie, Transformation, Change, Workshops, Schulung.
-   Öffnet die Tür und schafft den Übergang vom Pilot in die Produktion.
-3. **Erweiterung & Anpassung** (Werkvertrag oder T&M) — kundenspezifische Module,
-   Integrationen, Anpassungen.
+## Warum wir
 
-Die Beratung zieht die Lizenz, die Lizenz zieht Erweiterungsprojekte. Der
-wiederkehrende Lizenzanteil löst das Skalierungsproblem reiner Beratung.
+Wir verkaufen keine Zeit. Wir liefern Ergebnisse.
 
-## Wie wir arbeiten
+Wir leben die These selbst. Wir haben über 150 Entwickler im Bankenumfeld an
+AI-gestützte Arbeit herangeführt, VibeSkills aufgebaut und mit agent-sync Mensch
+und Agent in denselben Arbeitskanal gebracht.
 
-- **AI First.** Claude Code ist unser Default-Werkzeug — wir greifen zu AI, bevor
-  wir zu Boilerplate greifen. Das Urteil bleibt beim Menschen; AI ist Werkzeug,
-  kein Orakel.
-- **Radikale ökonomische Transparenz.** Wir legen offen, was Wert kostet — das
-  verschiebt die Beziehung von „Vendor bepreist die Arbeit" zu „zwei Parteien
-  handeln einen fairen Deal aus".
-- **Wir leben die These selbst.** VibeSkills in kürzester Zeit gebaut, agent-sync
-  (Mensch und Agent im selben Kanal), AI-Ready-Framework, Enablement für 150+
-  Entwickler im Bankenumfeld.
+Und wir bleiben Enabler. Wir hinterlassen euer Team stärker, als wir es
+vorgefunden haben. Euer Projekt ist das Rennauto, AI der Motor, euer Team fährt.
+Wir sind die Boxencrew. Wenn wir gehen, fahrt ihr weiter.
 
-## Mit wem wir arbeiten
+## Ein erster Schritt, ohne großes Commitment
 
-Mit Organisationen, die schneller, eigenständiger und zukunftssicher werden
-wollen — als **Peers, nicht als Käufer**. Klein und direkt ist bei uns bewusst so:
-das ist ein Feature, keine Entschuldigung.
+Drei niedrigschwellige Wege rein:
+
+- **Assessment.** Wir sehen uns euren Stand an und zeigen den konkreten Weg zur AI-native Organisation.
+- **Workshop.** Hands-on mit eurem Team an einem echten Stück Arbeit.
+- **Pilot.** Ein konkreter erster Anwendungsfall, vom Start bis in die Produktion.
+
+Danach lizenziert ihr RunWay jährlich und wir begleiten Einführung und
+Erweiterung so weit, wie ihr uns braucht. Nicht weiter.
 
 ---
 
-*Performance Dudes — professionell nach außen, Spaß nach innen.*
+Kein Pitch, kein Druck. Schreibt uns: **hello@performance-dudes.de**
+
+_Performance Dudes ist ein Kollektiv unabhängiger Entwickler und Berater.
+Klein und direkt, das ist Absicht._

@@ -109,13 +109,17 @@ Marketplace-Repos:
 
 > **Deprecated: `pd` und `skills-private`.** Beide Repos waren die **Alt-Plugin-
 > Marketplaces** (`pd@pd`, `skills-private@skills-private`) und sind **abgekündigt**
-> — abgelöst durch die `ai-plugins*`-Marketplaces oben. Im Workspace sind sie in
-> `.claude/settings.json` auf `false` gesetzt; **neue Arbeit gehört in
+> — abgelöst durch die `ai-plugins*`-Marketplaces oben. **Neue Arbeit gehört in
 > `ai-plugins-internal` (bzw. `ai-plugins`/`-enterprise`), nicht mehr in
-> `pd`/`skills-private`.** Migration läuft Plugin für Plugin (bisher:
-> `agent-sync@ai-plugins-internal`). Solange eine Fähigkeit noch nicht migriert
-> ist, zeigen einzelne Verweise unten übergangsweise weiter auf `pd`/`skills-private`
-> — das ist Legacy, nicht der Zielzustand.
+> `pd`/`skills-private`.**
+>
+> `skills-private` ist **vollständig migriert und archiviert**: die Skills leben
+> jetzt in `ai-plugins-internal` als `ai-first` (linniks-ai-first, ai-ready),
+> `engineering` (linniks-coding-philosophy, linniks-vibe-engineering), `sales`
+> (enterprise-angebot), `brand` (brand-uix) und `catchup` (im `workspace`-Plugin).
+> `pd` wird weiterhin Plugin für Plugin migriert; solange eine Fähigkeit dort noch
+> nicht migriert ist, zeigen einzelne Verweise unten übergangsweise weiter auf
+> `pd` — das ist Legacy, nicht der Zielzustand.
 
 **Setup (einmal pro Maschine) — Marketplaces im User-Scope registrieren:**
 

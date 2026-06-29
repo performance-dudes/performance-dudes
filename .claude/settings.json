@@ -1,7 +1,8 @@
 {
   "enabledPlugins": {
     "pd@pd": false,
-    "skills-private@skills-private": false,
+    "context-mode@context-mode": true,
+    "skills-private@skills-private": true,
     "agent-sync@ai-plugins-internal": true,
     "knowledge@ai-plugins-internal": true,
     "craft@ai-plugins-internal": true,

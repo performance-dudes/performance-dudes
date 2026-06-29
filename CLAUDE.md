@@ -144,6 +144,23 @@ Eltern-Verzeichnissen**: startet Claude in `be-plus/`, liest es nur
 `/reload-plugins` aktiviert. Plugins mit eigenem MCP-Server (z.B. `agent-sync`)
 bringen ihre `.mcp.json` selbst mit — kein manuelles Wiring nötig.
 
+**Externe Dependency: `context-mode`.** Das Plugin `context-aware@ai-plugins`
+hängt von der **context-mode-MCP** ab (Retrieval über `ctx_*`, hält Roh-Bytes aus
+dem Fenster). Die kommt aus einem **Drittanbieter-Marketplace** (`mksglu/context-mode`),
+nicht aus den PD-Repos — sie muss separat registriert und installiert werden, sonst
+läuft ein `context-mode`-Enable ins Leere und `ctx_*` fehlt. Nach der
+PD-Plugin-Regel (plugin-hygiene): **im User-Scope registrieren + installieren,
+dort deaktivieren, pro Projekt enablen.**
+
+```bash
+claude plugin marketplace add mksglu/context-mode
+claude plugin install context-mode@context-mode   # auto-enabled im User-Scope -> danach disablen
+```
+
+Dann pro Projekt aktivieren (z.B. Workspace-Wurzel):
+`{ "enabledPlugins": { "context-mode@context-mode": true, "context-aware@ai-plugins": true } }`,
+`/reload-plugins`. Check: `/context-aware-doctor`.
+
 ## Prerequisites check
 
 Before cloning anything, verify the user has:

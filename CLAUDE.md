@@ -273,6 +273,17 @@ Onboarding-Checkliste:
    **und** Signal-Account in der „Performance-Dudes"-Gruppe.
 3. **Tools**: `node` ≥ 20, `cloudflared` (`brew install cloudflared`), `signal-cli`
    (`brew install signal-cli`).
+   - **`agent-sync`-CLI installieren** — als **Self-Update-Wrapper**, damit das CLI
+     dem selbst-aktualisierenden Relay folgt (`~/.local/share/agent-sync/current`,
+     das `agent-sync update` umlegt) statt an einem Git-Checkout zu lagen. Über
+     `node` starten (die gebündelte `cli.mjs` trägt kein +x):
+     ```bash
+     printf '#!/bin/sh\nexec node "$HOME/.local/share/agent-sync/current/src/cli.mjs" "$@"\n' \
+       > "$(brew --prefix)/bin/agent-sync" && chmod +x "$(brew --prefix)/bin/agent-sync"
+     ```
+     Der Install `~/.local/share/agent-sync/current` entsteht beim ersten
+     Relay-Start (durch die MCP oder `agent-sync start`). **Nicht** `ln -s` auf einen
+     Dev-Checkout — das lagt, weil `agent-sync update` nur den Relay aktualisiert.
 4. **Cloudflare Access**: `cloudflared access login https://agent-sync.performance-dudes.com`
    (Browser, GitHub-OAuth; erneuert sich danach ~monatlich selbst).
 5. **signal-cli linken**: `signal-cli link -n "<mac-name>"` (QR mit Handy scannen),

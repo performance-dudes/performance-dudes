@@ -8,6 +8,7 @@
     "ocr@ai-plugins": true,
     "image-toolkit@ai-plugins": true,
     "agent-sync@ai-plugins-internal": true,
+    "atlas@ai-plugins-enterprise": true,
     "knowledge@ai-plugins-internal": true,
     "craft@ai-plugins-internal": true,
     "workspace@ai-plugins-internal": true,

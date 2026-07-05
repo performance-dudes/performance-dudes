@@ -17,6 +17,7 @@
     "sales@ai-plugins-internal": true,
     "brand@ai-plugins-internal": true,
     "merge-gate@ai-plugins-internal": true,
-    "plugin-eval@ai-plugins-internal": true
+    "plugin-eval@ai-plugins-internal": true,
+    "cockpit@ai-plugins-internal": true
   }
 }

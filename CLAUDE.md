@@ -30,19 +30,22 @@ first (see „Things you should NOT do").
    → [Prerequisites check](#prerequisites-check)
 4. **Pre-commit secret gate** — `lefthook install` (+ gitleaks).
    → [Pre-Commit Secret Prevention](#pre-commit-secret-prevention)
-5. **Plugins** — register the user-scope marketplaces the user can reach; the
-   workspace root enables `agent-sync@ai-plugins-internal` in
-   `performance-dudes/.claude/settings.json`, and each sub-repo enables it in its
-   own `<repo>/.claude/settings.json` (z.B. `be-plus/.claude/settings.json`) —
+5. **Plugins** — register the user-scope marketplaces the user can reach.
+   `agent-sync@ai-plugins-internal` bleibt im Workspace-Root **`false`**
+   (Team-Entscheidung, siehe „Plugins" und „agent-sync channel") — jede
+   Session entscheidet selbst per `cl`-Alias-Flag über Kanal-Teilnahme. Andere
+   Plugins enablet jedes Sub-Repo in seiner eigenen
+   `<repo>/.claude/settings.json` (z.B. `be-plus/.claude/settings.json`) —
    Settings werden **nicht** aus Eltern-Verzeichnissen vererbt; `/reload-plugins`.
    → [Plugins](#plugins)
 6. **Clone the sub-repos** — clone the visible repos, each following its own
    `## Setup default`. → [Clone the sub-repos](#clone-the-sub-repos)
-7. **agent-sync — set up AND test** — install + configure its deps (signal-cli,
-   cloudflared), link Signal, write the config, **start Claude with the channel
-   flag** (plain `claude` does NOT carry the channel — see below), start the
-   relay, and **prove it works** (`agent-sync status` + the probe →
-   `confirm_channel`). → [agent-sync channel](#agent-sync-channel)
+7. **agent-sync — currently on hold, cockpit ist der Nachfolger** — das
+   Backing-Repo von `agent-sync` existiert nicht mehr; `cockpit` ist noch im
+   Bootstrap-Status (kein Hub deployed, keine Binaries released). Prerequisites
+   (signal-cli, cloudflared, Cloudflare Access) kann man trotzdem vorbereiten,
+   der eigentliche Channel-Bootstrap ist aber aktuell nicht durchführbar.
+   → [agent-sync channel](#agent-sync-channel)
 8. **Hand over** — show the user what they got, the structure, next steps; offer
    to explain agent-sync; invite questions, anytime. → [Final handover](#final-handover--orientation--offer-to-explain)
 
@@ -142,11 +145,20 @@ Eltern-Verzeichnissen**: startet Claude in `be-plus/`, liest es nur
 `.claude/settings.json` des Eltern-Workspace. Beispiel:
 
 ```json
-{ "enabledPlugins": { "agent-sync@ai-plugins-internal": true } }
+{ "enabledPlugins": { "example-plugin@ai-plugins-internal": true } }
 ```
 
 `/reload-plugins` aktiviert. Plugins mit eigenem MCP-Server (z.B. `agent-sync`)
 bringen ihre `.mcp.json` selbst mit — kein manuelles Wiring nötig.
+
+**Ausnahme `agent-sync@ai-plugins-internal`:** bleibt im Workspace-Root bewusst
+`false` (PR #32, Felix) — der Channel soll nicht automatisch in jeder Session
+mitlaufen, sondern pro Session gezielt über den `cl`-Alias geladen werden (siehe
+„agent-sync channel"). Beim `claude plugin install` wird ein Plugin i.d.R.
+automatisch im User-Scope (`~/.claude/settings.json`) auf `true` gesetzt — das
+für `agent-sync@ai-plugins-internal` **danach wieder auf `false` korrigieren**,
+sonst läuft der Channel künftig in jedem Projekt ohne eigene Override
+automatisch mit.
 
 **Externe Dependency: `context-mode`.** Das Plugin `context-aware@ai-plugins`
 hängt von der **context-mode-MCP** ab (Retrieval über `ctx_*`, hält Roh-Bytes aus
@@ -261,91 +273,78 @@ When the user wants to sign a document or issue a certificate, follow
 
 ## agent-sync channel
 
+> **Status (Stand 2026-07-21): pausiert, Nachfolger `cockpit`.** Das
+> Backing-Repo `performance-dudes/agent-sync` (Relay-/CLI-/Server-Code) existiert
+> nicht mehr — `gh repo view performance-dudes/agent-sync` scheitert, das Repo
+> taucht auch nicht mehr in `gh repo list` auf. Nachfolger ist
+> [`cockpit`](https://github.com/performance-dudes/cockpit) („enterprise-grade
+> Rewrite von agent-sync"), aber `cockpit/README.md` zeigt **Status: Bootstrap**
+> — Repo, Specs und Plan stehen, der Rewrite wird noch gebaut. Kein Hub deployed,
+> keine Binaries released, keine End-User-Onboarding-Anleitung.
+>
+> **Praktisch heißt das:** Die Schritte unten bis einschließlich Cloudflare
+> Access + signal-cli-Link funktionieren weiterhin (der alte Remote-Server unter
+> `agent-sync.performance-dudes.com` läuft offenbar noch), aber der lokale
+> CLI-Wrapper/Relay-Bootstrap (`agent-sync start`, `~/.local/share/agent-sync/current`)
+> läuft ins Leere, weil es keine Quelle mehr gibt, von der das Relay-Bundle
+> gezogen werden könnte. **Vor einem neuen Versuch immer zuerst
+> `cockpit/README.md` auf einen aktuelleren Status prüfen** — sobald cockpit
+> released ist, ersetzt es diesen ganzen Abschnitt.
+
 Wer Channel-Zugriff hat, koordiniert über die geteilte Signal-Gruppe direkt aus
 Claude-Code-Sessions (Agent↔Agent + Signal an Menschen). Der Kanal ist das Plugin
-`agent-sync@ai-plugins-internal`. Voller Walkthrough:
-`ai-plugins-internal/agent-sync/server/README.md` — hier die Schritte als
-Onboarding-Checkliste:
+`agent-sync@ai-plugins-internal`. Solange kein cockpit-Release vorliegt, hier nur
+die Schritte, die tatsächlich noch funktionieren (Vorbereitung, kein
+vollständiger Bootstrap):
 
-1. **Marketplace + Plugin** (siehe „Plugins"): `ai-plugins-internal` im User-Scope
-   registriert, `agent-sync@ai-plugins-internal` im Workspace enabled.
+1. **Marketplace + Plugin registrieren** (siehe „Plugins"): `ai-plugins-internal`
+   im User-Scope registrieren, Plugin explizit installieren
+   (`claude plugin install agent-sync@ai-plugins-internal` — cached den Code,
+   damit der Channel-Flag es überhaupt findet), **danach im User-Scope wieder
+   auf `false` korrigieren** (siehe Ausnahme-Hinweis in „Plugins").
 2. **Voraussetzungen**: GitHub-Org-Mitgliedschaft (lässt Cloudflare Access durch)
    **und** Signal-Account in der „Performance-Dudes"-Gruppe.
-3. **Tools**: `node` ≥ 20, `cloudflared` (`brew install cloudflared`), `signal-cli`
-   (`brew install signal-cli`).
-   - **`agent-sync`-CLI installieren** — als **Self-Update-Wrapper**, damit das CLI
-     dem selbst-aktualisierenden Relay folgt (`~/.local/share/agent-sync/current`,
-     das `agent-sync update` umlegt) statt an einem Git-Checkout zu lagen. Über
-     `node` starten (die gebündelte `cli.mjs` trägt kein +x):
-     ```bash
-     printf '#!/bin/sh\nexec node "$HOME/.local/share/agent-sync/current/src/cli.mjs" "$@"\n' \
-       > "$(brew --prefix)/bin/agent-sync" && chmod +x "$(brew --prefix)/bin/agent-sync"
-     ```
-     Der Install `~/.local/share/agent-sync/current` entsteht beim ersten
-     Relay-Start (durch die MCP oder `agent-sync start`). **Nicht** `ln -s` auf einen
-     Dev-Checkout — das lagt, weil `agent-sync update` nur den Relay aktualisiert.
+3. **Tools**: `node` ≥ 20, `cloudflared`, `signal-cli` (auf Linux ohne Homebrew:
+   Distro-Paketmanager, z.B. `pacman`/AUR — `signal-cli` braucht zum Bauen UND
+   Laufen mindestens Java 25, `archlinux-java set java-25-openjdk` falls der
+   Build mit `UnsupportedClassVersionError` scheitert).
 4. **Cloudflare Access**: `cloudflared access login https://agent-sync.performance-dudes.com`
-   (Browser, GitHub-OAuth; erneuert sich danach ~monatlich selbst).
-5. **signal-cli linken**: `signal-cli link -n "<mac-name>"` (QR mit Handy scannen),
-   `signal-cli listAccounts` prüft.
-6. **Config** `~/.config/agent-sync/settings.json` — **Claude richtet sie ein und
-   fragt den User nach allem, was nicht automatisch ableitbar ist.** Vorgehen:
-   - `agent-sync start` legt beim ersten Lauf ein Skelett an und füllt
-     `signal.account` automatisch aus `signal-cli listAccounts`.
-   - Den Rest setzt Claude **entweder über die CLI-Setter** (bevorzugt, validiert):
-     - `agent-sync label <handle>` → `selfLabel` (dein Channel-Handle, z. B. `felix` —
-       frag den User danach).
-     - `agent-sync remote https://agent-sync.performance-dudes.com` → Remote-Server.
-     - `agent-sync cf on` → Cloudflare Access aktivieren.
-   - **oder** Claude editiert `settings.json` direkt und fragt den User nach den
-     fehlenden Werten — vor allem die `identity`-Map (Teammitglied-UUID → Label),
-     die nicht automatisch entsteht.
-   - `agent-sync config` zeigt jederzeit die **effektive** Config (read-only) zur
-     Kontrolle. Danach `chmod 600 ~/.config/agent-sync/settings.json`.
-   Frag den User Schritt für Schritt nach `selfLabel` und den `identity`-Einträgen;
-   setze den Rest aus den bekannten Defaults. Niemals raten — nachfragen.
-7. **Claude mit dem Channel-Flag starten** — der Push-Channel braucht das
-   development-channels-Flag. Leg dir **`cl` als deinen Claude-Alias** an
-   (`~/.zshrc`), dann startest du Claude immer mit Channel:
-   ```bash
-   alias cl='claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal'
-   ```
-   Ab dann einfach `cl` statt `claude`.
-8. **Relay starten + verifizieren**: `agent-sync start` (legt beim ersten Start die
-   Config an, startet den Relay). Dann **beweisen, dass es läuft**: `agent-sync
-   status` zeigt alles — Relay UP, signal/remote, deine Session, Channel/Flag.
-   Beim MCP-Start kommt zudem eine `probe` → `confirm_channel` mit der nonce →
-   `channel:on`.
+   (Browser, GitHub-OAuth; erneuert sich danach ~monatlich selbst). Funktioniert
+   aktuell noch.
+5. **signal-cli linken**: `signal-cli link -n "<geraete-name>"` gibt einen
+   `sgnl://linkdevice?...`-Link aus, **keinen** fertigen QR-Code im Terminal —
+   selbst mit z.B. `qrencode` in ein Bild umwandeln und zeitnah scannen (das
+   Link-Fenster ist kurz, ca. 1–2 Minuten); `signal-cli listAccounts` prüft
+   danach die Verlinkung.
+6. **Ab hier pausiert:** Config schreiben, `agent-sync start`, Channel-Flag-Test
+   (`cl`-Alias) — der Relay-Bootstrap findet keine Quelle mehr und schlägt mit
+   `Cannot find module '.../current/src/cli.mjs'` fehl. Nicht weiter versuchen,
+   bis `cockpit` released ist; stattdessen den Stand dieses Abschnitts sowie
+   `cockpit/README.md` erneut prüfen.
 
-**Self-Update:** der Relay hält sich selbst aktuell — `agent-sync start` zieht
-vorher die zum Server passende Version (Config `autoUpdate`, **Default on**). Du
-musst nichts pullen. Manuell: `agent-sync update`; abschalten:
-`agent-sync autoupdate off`. Details: `agent-sync/CLAUDE.md` → „Versionen & Update".
-
-`AGENT_SYNC_USER_ALLOWLIST` ist serverseitig bewusst leer (Autorisierungsgrenze =
-Cloudflare Access). Architektur, Server-/Relay-Code, Deploy, ADRs: separates Repo
-`performance-dudes/agent-sync`.
+`AGENT_SYNC_USER_ALLOWLIST` war serverseitig bewusst leer (Autorisierungsgrenze =
+Cloudflare Access). Architektur, Server-/Relay-Code, Deploy, ADRs lagen im
+separaten Repo `performance-dudes/agent-sync` (jetzt nicht mehr vorhanden) —
+für den Nachfolger siehe `cockpit/docs/architecture/0001-overview-and-decisions.md`.
 
 ## Final handover — orientation + offer to explain
 
 When setup is done, don't just stop — orient the user. Give a short, friendly
 wrap-up (adapt to what they actually got):
 
-- **What you now have** — list the cloned repos with a one-line each, the active
-  plugins (`agent-sync@ai-plugins-internal`, plus any the user's access reached), and the
-  agent-sync channel status (`channel:on`? relay up?).
+- **What you now have** — list the cloned repos with a one-line each and the
+  active plugins the user's access reached. The agent-sync channel is on hold
+  (see „agent-sync channel") — say plainly whether prep steps (signal-cli
+  linked, Cloudflare Access logged in) succeeded, and that the actual channel
+  waits on the `cockpit` release.
 - **The structure** — everything is a sibling inside this workspace folder
-  (`./trust/`, `./pd/`, `./agent-sync/`, …), each repo with its own `CLAUDE.md` and
+  (`./trust/`, `./pd/`, `./cockpit/`, …), each repo with its own `CLAUDE.md` and
   rules. This repo is the workspace meta-repo.
-- **Next steps** — e.g. start Claude with your `cl` alias (Claude + channel), try
-  `agent-sync status`, and that PKI/signing is there **when you need it** (on demand).
-- **Offer to explain agent-sync** — proactively offer a short walkthrough: how the
-  channel works (agent↔agent + Signal), `@group` vs topics vs `label::name`, how to
-  see who's working on what, and the collaboration skills (brainstorming, pairing,
-  feedback-and-culture, mentoring). Point to the `agent-sync-usage` skill and
-  `agent-sync/docs/collaboration.md`.
-- **Invite questions, anytime** — make explicit that they can ask anything about the
-  setup, the repos, or agent-sync at any point, now or later.
+- **Next steps** — e.g. that PKI/signing is there **when you need it** (on
+  demand), and that the agent-sync channel returns once `cockpit` ships (check
+  `cockpit/README.md`'s status line periodically).
+- **Invite questions, anytime** — make explicit that they can ask anything about
+  the setup or the repos at any point, now or later.
 
 Keep it brief and welcoming — a map and an open door, not a wall of text.
 

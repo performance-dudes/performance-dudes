@@ -29,7 +29,7 @@ culture/
 brand/
 presentation/
 pdos/
-agent-sync/
+cockpit/
 
 # Plugin-Marketplace-Repos (User-Scope-Marketplaces, eigene Git-Repos)
 ai-plugins/

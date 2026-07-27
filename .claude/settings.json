@@ -1,6 +1,5 @@
 {
   "enabledPlugins": {
-    "agent-sync@ai-plugins-internal": false,
     "ai-first@ai-plugins-internal": true,
     "atlas@ai-plugins-enterprise": true,
     "brand@ai-plugins-internal": true,

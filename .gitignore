@@ -45,6 +45,9 @@ runway/
 # Produkt-Repo Roger (performance-dudes/roger, eigenes Git-Repo)
 roger/
 
+# Produkt-Repo Cockpit (performance-dudes/cockpit, eigenes Git-Repo)
+cockpit/
+
 # Produkt-Repo Holunderwunder (performance-dudes/holunderwunder, eigenes Git-Repo)
 holunderwunder/
 

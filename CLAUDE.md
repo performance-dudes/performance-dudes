@@ -1,6 +1,6 @@
 # Claude Code Instructions — Performance Dudes Workspace Setup
 
-You are assisting someone setting up their Performance Dudes workspace. The user has cloned this repo (`performance-dudes/performance-dudes`) and started Claude Code from inside it. Your job: get them fully operational. **There are no roles here** — nobody is boxed or limited by a "founder/partner/member" label. What someone can do follows entirely from which repos they can actually see on GitHub.
+You are assisting someone setting up their Performance Dudes workspace. The user has cloned this repo (`performance-dudes/performance-dudes`) and started Claude Code or Codex from inside it. Your job: get them fully operational. **There are no roles here** — nobody is boxed or limited by a "founder/partner/member" label. What someone can do follows entirely from which repos they can actually see on GitHub.
 
 **Entry point:** when the user says **"set me up"** (or anything equivalent, or just
 starts a fresh session here), run the **"Set me up" flow** below end-to-end. That
@@ -35,14 +35,17 @@ first (see „Things you should NOT do").
    `performance-dudes/.claude/settings.json`, and each sub-repo enables it in its
    own `<repo>/.claude/settings.json` (z.B. `be-plus/.claude/settings.json`) —
    Settings werden **nicht** aus Eltern-Verzeichnissen vererbt; `/reload-plugins`.
+   Codex does not load Claude plugins; it uses `AGENTS.md` plus the shared
+   `agent-sync` CLI/config.
    → [Plugins](#plugins)
 6. **Clone the sub-repos** — clone the visible repos, each following its own
    `## Setup default`. → [Clone the sub-repos](#clone-the-sub-repos)
 7. **agent-sync — set up AND test** — install + configure its deps (signal-cli,
-   cloudflared), link Signal, write the config, **start Claude with the channel
-   flag** (plain `claude` does NOT carry the channel — see below), start the
-   relay, and **prove it works** (`agent-sync status` + the probe →
-   `confirm_channel`). → [agent-sync channel](#agent-sync-channel)
+   cloudflared), link Signal, write the config, start the client-specific path
+   from `~/.config/agent-sync/settings.json` (`clients.profiles`: Claude uses the
+   channel flag; Codex uses `agent-sync poll <group>`), start the relay, and
+   **prove it works** (`agent-sync status` + the client-specific receive check).
+   → [agent-sync channel](#agent-sync-channel)
 8. **Hand over** — show the user what they got, the structure, next steps; offer
    to explain agent-sync; invite questions, anytime. → [Final handover](#final-handover--orientation--offer-to-explain)
 
@@ -165,6 +168,15 @@ Dann pro Projekt aktivieren (z.B. Workspace-Wurzel):
 `{ "enabledPlugins": { "context-mode@context-mode": true, "context-aware@ai-plugins": true } }`,
 `/reload-plugins`. Check: `/context-aware-doctor`.
 
+Codex nutzt dieses Claude-Plugin-System nicht. Für Codex ist `AGENTS.md` der
+Repo-Einstieg und `agent-sync` wird parallel über die gemeinsame Config
+`~/.config/agent-sync/settings.json` betrieben. Das Feld `clients.profiles.codex`
+enthält die passenden CLI-Kommandos für Start, Poll, Status und Senden:
+`agent-sync start`, `agent-sync status`, `agent-sync poll <group>`,
+`agent-sync send <group> "<message>"` und
+`agent-sync send --signal <group> "<message>"`. Details:
+`agent-sync/docs/codex.md`.
+
 ## Prerequisites check
 
 Before cloning anything, verify the user has:
@@ -262,10 +274,11 @@ When the user wants to sign a document or issue a certificate, follow
 ## agent-sync channel
 
 Wer Channel-Zugriff hat, koordiniert über die geteilte Signal-Gruppe direkt aus
-Claude-Code-Sessions (Agent↔Agent + Signal an Menschen). Der Kanal ist das Plugin
-`agent-sync@ai-plugins-internal`. Voller Walkthrough:
-`ai-plugins-internal/agent-sync/server/README.md` — hier die Schritte als
-Onboarding-Checkliste:
+Claude-Code- oder Codex-Sessions (Agent↔Agent + Signal an Menschen). Claude
+bekommt Push-Delivery über das Plugin `agent-sync@ai-plugins-internal`; Codex
+nutzt denselben lokalen Relay stabil per CLI-Polling. Voller Walkthrough:
+`ai-plugins-internal/agent-sync/server/README.md` und für Codex zusätzlich
+`agent-sync/docs/codex.md` — hier die Schritte als Onboarding-Checkliste:
 
 1. **Marketplace + Plugin** (siehe „Plugins"): `ai-plugins-internal` im User-Scope
    registriert, `agent-sync@ai-plugins-internal` im Workspace enabled.
@@ -288,34 +301,47 @@ Onboarding-Checkliste:
    (Browser, GitHub-OAuth; erneuert sich danach ~monatlich selbst).
 5. **signal-cli linken**: `signal-cli link -n "<mac-name>"` (QR mit Handy scannen),
    `signal-cli listAccounts` prüft.
-6. **Config** `~/.config/agent-sync/settings.json` — **Claude richtet sie ein und
-   fragt den User nach allem, was nicht automatisch ableitbar ist.** Vorgehen:
+6. **Config** `~/.config/agent-sync/settings.json` — **der aktive Agent richtet
+   sie ein und fragt den User nach allem, was nicht automatisch ableitbar ist.**
+   Vorgehen:
    - `agent-sync start` legt beim ersten Lauf ein Skelett an und füllt
      `signal.account` automatisch aus `signal-cli listAccounts`.
-   - Den Rest setzt Claude **entweder über die CLI-Setter** (bevorzugt, validiert):
+   - Den Rest setzt der Agent **entweder über die CLI-Setter** (bevorzugt,
+     validiert):
      - `agent-sync label <handle>` → `selfLabel` (dein Channel-Handle, z. B. `felix` —
        frag den User danach).
      - `agent-sync remote https://agent-sync.performance-dudes.com` → Remote-Server.
      - `agent-sync cf on` → Cloudflare Access aktivieren.
-   - **oder** Claude editiert `settings.json` direkt und fragt den User nach den
+   - **oder** der Agent editiert `settings.json` direkt und fragt den User nach den
      fehlenden Werten — vor allem die `identity`-Map (Teammitglied-UUID → Label),
      die nicht automatisch entsteht.
    - `agent-sync config` zeigt jederzeit die **effektive** Config (read-only) zur
      Kontrolle. Danach `chmod 600 ~/.config/agent-sync/settings.json`.
    Frag den User Schritt für Schritt nach `selfLabel` und den `identity`-Einträgen;
    setze den Rest aus den bekannten Defaults. Niemals raten — nachfragen.
-7. **Claude mit dem Channel-Flag starten** — der Push-Channel braucht das
-   development-channels-Flag. Leg dir **`cl` als deinen Claude-Alias** an
-   (`~/.zshrc`), dann startest du Claude immer mit Channel:
-   ```bash
-   alias cl='claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal'
-   ```
-   Ab dann einfach `cl` statt `claude`.
+7. **Client-spezifisch starten** — lies `clients.profiles.<client>` aus
+   `~/.config/agent-sync/settings.json` und nutze den passenden Pfad:
+   - **Claude:** Der Push-Channel braucht das development-channels-Flag. Leg dir
+     **`cl` als deinen Claude-Alias** an (`~/.zshrc`), dann startest du Claude
+     immer mit Channel:
+     ```bash
+     alias cl='claude --dangerously-load-development-channels plugin:agent-sync@ai-plugins-internal'
+     ```
+     Ab dann einfach `cl` statt `claude`.
+   - **Codex:** Codex lädt keine Claude-Plugins und bekommt keine bewiesene
+     Push-Delivery. Starte den Relay und nutze Polling als stabilen Empfangspfad:
+     `agent-sync start`, `agent-sync status`, dann `agent-sync poll <group>`.
+     Poll immer vor der Arbeit und vor der finalen Antwort. Senden läuft über
+     `agent-sync send <group> "<message>"`; Menschen erreichst du mit
+     `agent-sync send --signal <group> "<message>"`.
 8. **Relay starten + verifizieren**: `agent-sync start` (legt beim ersten Start die
-   Config an, startet den Relay). Dann **beweisen, dass es läuft**: `agent-sync
-   status` zeigt alles — Relay UP, signal/remote, deine Session, Channel/Flag.
-   Beim MCP-Start kommt zudem eine `probe` → `confirm_channel` mit der nonce →
-   `channel:on`.
+   Config an, startet den Relay). Dann **beweisen, dass es läuft**:
+   `agent-sync status` zeigt Relay UP, signal/remote und die aktiven Sessions.
+   Für Claude beweist der MCP-Start zusätzlich Push-Delivery über `probe` →
+   `confirm_channel` → `channel:on`. Für Codex ist der Nachweis ein erfolgreicher
+   `agent-sync poll <group>` auf der relevanten Gruppe; wenn keine Nachrichten
+   offen sind, muss der Befehl sauber ohne Fehler zurückkehren und `status` den
+   Relay weiterhin als UP anzeigen.
 
 **Self-Update:** der Relay hält sich selbst aktuell — `agent-sync start` zieht
 vorher die zum Server passende Version (Config `autoUpdate`, **Default on**). Du
@@ -337,8 +363,9 @@ wrap-up (adapt to what they actually got):
 - **The structure** — everything is a sibling inside this workspace folder
   (`./trust/`, `./pd/`, `./agent-sync/`, …), each repo with its own `CLAUDE.md` and
   rules. This repo is the workspace meta-repo.
-- **Next steps** — e.g. start Claude with your `cl` alias (Claude + channel), try
-  `agent-sync status`, and that PKI/signing is there **when you need it** (on demand).
+- **Next steps** — e.g. start Claude with your `cl` alias (Claude + channel) or
+  Codex with `agent-sync poll <group>` as receive path, try `agent-sync status`,
+  and that PKI/signing is there **when you need it** (on demand).
 - **Offer to explain agent-sync** — proactively offer a short walkthrough: how the
   channel works (agent↔agent + Signal), `@group` vs topics vs `label::name`, how to
   see who's working on what, and the collaboration skills (brainstorming, pairing,

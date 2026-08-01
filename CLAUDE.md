@@ -349,17 +349,6 @@ wrap-up (adapt to what they actually got):
 
 Keep it brief and welcoming — a map and an open door, not a wall of text.
 
-## Projekt-Workspace-Repos (PWR)
-
-Die PD-Produkte — Runway, Roger, cockpit, design-system, help-center — arbeiten alle auf
-**Projekt-Workspace-Repos**. Welcher Ordner welchem Produkt gehört und wer liest oder schreibt,
-steht in [`docs/pwr-contract.md`](docs/pwr-contract.md). Die harte Regel daraus:
-
-> Kein Produkt schreibt Dateien in ein PWR. Dateien entstehen ausschliesslich über einen
-> Merge Request — von Menschen oder Entwicklungsagenten.
-
-Zugriff regelt der Vertrag **nicht**: es gilt weiter „Access from GitHub, not roles".
-
 ## Things you should NOT do
 
 - Run `harden-signing.sh` or anything that captures the passphrase (user must run it themselves)

@@ -45,8 +45,16 @@ runway/
 # Produkt-Repo Roger (performance-dudes/roger, eigenes Git-Repo)
 roger/
 
-# Produkt-Repo Holunderwunder (performance-dudes/holunderwunder, eigenes Git-Repo)
+# CRM / Daten-Mgmt für Holunderwunder (performance-dudes/crm, eigenes Git-Repo)
+# Vormals performance-dudes/holunderwunder — Repo wurde umbenannt.
+crm/
 holunderwunder/
+
+# Design-System-Monorepo (performance-dudes/design-system, eigenes Git-Repo)
+design-system/
+
+# Analytics-Hub (performance-dudes/pd-analytics, eigenes Git-Repo)
+pd-analytics/
 
 # Elastocor-Workspace (eigenes Git-Repo, eigene Projekte)
 elastocor/

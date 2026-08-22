@@ -223,12 +223,22 @@ checklist:
    Until login the hub stays fail-closed (401 on `/send`/`/poll`) — that is correct.
    The `--label` is the channel handle (e.g. `benny`) — ask the user for it, do not
    guess.
+
+   **Konto verknüpfen.** Group membership for org-bound projects (e.g.
+   `performance-dudes`) is derived from the GitHub identity linked to the cockpit
+   account — not from the login provider alone. Right after the first login,
+   complete **„Konto verknüpfen"** with GitHub in the cockpit web UI
+   (https://cockpit.performance-dudes.com). Skip it and topics stay invisible even
+   though the group itself shows up (sticky-guest gap, tracked in
+   `performance-dudes/cockpit#471`).
 5. **Start Claude with the channel flag** — without the flag the channel stays
-   reachable via `poll`, but nothing pops up on its own. Alias in `~/.zshrc`:
+   reachable via `poll`, but nothing pops up on its own. The **flag is mandatory**,
+   the alias **name is free** — `clc` below is just the convention this workspace
+   settled on:
    ```bash
    alias clc='claude --dangerously-load-development-channels plugin:cockpit@ai-plugins-internal'
    ```
-   From then on, `clc` instead of `claude`.
+   Add it to `~/.zshrc`; from then on, `clc` instead of `claude`.
 6. **Verify — prove that it works:**
    - `cockpit doctor` → end-to-end health check (node/auth/hub/bridge) with
      prioritised actions. The first thing to reach for when something is missing.

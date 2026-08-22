@@ -199,6 +199,10 @@ onboarding):
   `cockpit node restart` fixes it, no re-login needed.
 - *Nothing pops up:* flag set (`clc` instead of `claude`)? The node only learns about
   a session from its first cockpit tool call (e.g. `status`).
+- *Group visible but no topics:* GitHub identity not linked yet — do „Konto
+  verknüpfen" in the cockpit web UI (see
+  [`docs/ONBOARDING.md#cockpit-channel`](docs/ONBOARDING.md#cockpit-channel),
+  `performance-dudes/cockpit#471`).
 
 When in doubt the plugin's `cockpit` skill is authoritative — the CLI evolves faster
 than this file.

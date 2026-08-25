@@ -66,3 +66,19 @@ generate-image.py
 generate-pdf.py
 out/
 *.png
+
+# Produkt-Repo cockpit (performance-dudes/cockpit, eigenes Git-Repo)
+cockpit/
+
+# Produkt-Repo CRM (performance-dudes/crm, eigenes Git-Repo)
+crm/
+
+# Produkt-Repo Design-System (performance-dudes/design-system, eigenes Git-Repo)
+design-system/
+
+# Produkt-Repo pd-analytics (performance-dudes/pd-analytics, eigenes Git-Repo)
+pd-analytics/
+
+# Lokale Codex-Plugin-Artefakte (kein Sub-Repo, lokal erzeugt)
+codex-marketplace/
+codex-plugins/

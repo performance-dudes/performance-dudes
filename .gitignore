@@ -39,6 +39,9 @@ ai-plugins-enterprise/
 # Research-/Testlauf-Workspace (kein Sub-Repo, nur lokale Recherche)
 holunder/
 
+# Eigenes Repo, in den Workspace geklont (performance-dudes/pd-bounty)
+pd-bounty/
+
 # Produkt-Repo RunWay (performance-dudes/runway, eigenes Git-Repo)
 runway/
 

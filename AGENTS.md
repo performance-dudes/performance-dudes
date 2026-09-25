@@ -70,6 +70,8 @@ All repos sit as siblings **inside** this workspace directory (`./trust/`, `./pd
 …) and are gitignored here. Each is a standalone git repo with its own instruction file:
 `AGENTS.md`, or `CLAUDE.md` where a repo keeps that name. Wherever this file says
 `AGENTS.md` about a sub-repo, a `CLAUDE.md` there counts the same.
+**Never both in one folder:** where `AGENTS.md` and `CLAUDE.md` sit side by side,
+Claude Code loads only `CLAUDE.md`. New instruction files are named `AGENTS.md`.
 
 The **public** repos are the only ones that are the same for everyone:
 

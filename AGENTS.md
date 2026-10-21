@@ -2,7 +2,7 @@
 
 This is the **workspace meta repo**. The actual work happens in the sub-repos that
 sit inside it as siblings (`./trust/`, `./pd/`, `./ai-plugins*/`, …) — each with its
-own `CLAUDE.md` and its own rules.
+own instruction file and its own rules.
 
 **There are no roles here.** Nobody is constrained by a "Founder/Partner/Member"
 label. What someone can do follows solely from which repos they can actually see on
@@ -67,7 +67,11 @@ These apply in **every** session in this workspace — independently of onboardi
 ### The PD repos
 
 All repos sit as siblings **inside** this workspace directory (`./trust/`, `./pd/`,
-…) and are gitignored here. Each is a standalone git repo with its own `CLAUDE.md`.
+…) and are gitignored here. Each is a standalone git repo with its own instruction file:
+`AGENTS.md`, or `CLAUDE.md` where a repo keeps that name. Wherever this file says
+`AGENTS.md` about a sub-repo, a `CLAUDE.md` there counts the same.
+**Never both in one folder:** where `AGENTS.md` and `CLAUDE.md` sit side by side,
+Claude Code loads only `CLAUDE.md`. New instruction files are named `AGENTS.md`.
 
 The **public** repos are the only ones that are the same for everyone:
 
@@ -83,7 +87,7 @@ Everything **else** is private and **varies per person** — do not assume a giv
 private repo exists or is visible. What someone sees is answered by
 `gh repo list performance-dudes`.
 
-**Every sub-repo declares its own setup layout**, in its `CLAUDE.md` under
+**Every sub-repo declares its own setup layout**, in its `AGENTS.md` under
 `## Setup default`. The pattern is either **classic** (`git clone`) or **worktree**
 (bare repo + one worktree per PR). Without a declaration, classic applies. The
 workspace holds no central allowlist — what the sub-repo says, goes. A person's own
@@ -91,27 +95,27 @@ preference beats the repo default at any time.
 
 ### Never change sub-repos from here
 
-Every sub-repo has its own `CLAUDE.md` and its own rules. Changes happen in the
+Every sub-repo has its own `AGENTS.md` and its own rules. Changes happen in the
 respective repo, following its conventions — not from the workspace.
 
-**IMPORTANT: A sub-repo's `CLAUDE.md` is binding, and you have normally NOT read
+**IMPORTANT: A sub-repo's `AGENTS.md` is binding, and you have normally NOT read
 it.** At startup Claude Code loads only the working directory and the directories
 **above** it. When the session runs here in the workspace root,
-`<sub-repo>/CLAUDE.md` is a directory **below** — at best it loads "on demand", when
+`<sub-repo>/AGENTS.md` is a directory **below** — at best it loads "on demand", when
 you read an existing file there. `Write` on new files, `Bash` with `cat`/`rg`/`ls`,
 and a `/compact` in between have all proven insufficient to trigger it.
 
 So before you write **anything** in a sub-repo:
 
 ```bash
-cat <sub-repo>/CLAUDE.md            # does it exist? then it applies — "unread" is no excuse
+cat <sub-repo>/AGENTS.md <sub-repo>/CLAUDE.md 2>/dev/null   # whatever exists applies — "unread" is no excuse
 ```
 
 And follow it, even when that is more work than the obvious path. Typical case: a
 repo requires a spec, tests, evals and a journal entry for every product change.
 Skip that and you build straight past the CI gate, learning about it from a red PR.
 
-If the sub-`CLAUDE.md` points to further binding files (e.g. a
+If the sub-repo's `AGENTS.md` points to further binding files (e.g. a
 `specs/…-conventions.md`), those count just the same.
 
 ### Merge policy
@@ -215,7 +219,7 @@ First-time setup: [`docs/ONBOARDING.md`](docs/ONBOARDING.md#cockpit-channel).
 The workspace hook (gitleaks + PD custom patterns) prevents accidental secret
 commits; rules and the bypass path are documented in the comments of `lefthook.yml`.
 Real secrets belong in `~/.config/pd/` (gitignored). Sub-repos have their own gates,
-see their `CLAUDE.md`.
+see their `AGENTS.md`.
 
 ### Signing
 
@@ -248,7 +252,7 @@ wherever German text is actually produced.
 
 - Run `harden-signing.sh` or anything that captures the passphrase — the human does
   that themselves.
-- Change the internal state of sub-repos (each has its own `CLAUDE.md`).
+- Change the internal state of sub-repos (each has its own `AGENTS.md`).
 - Install tools without asking (least of all with sudo).
 - Approve workflow runs on someone's behalf unless explicitly asked (you *can* do it
   via `gh api`, but ask first).

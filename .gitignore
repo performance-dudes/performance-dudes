@@ -87,3 +87,6 @@ pd-analytics/
 # Lokale Codex-Plugin-Artefakte (kein Sub-Repo, lokal erzeugt)
 codex-marketplace/
 codex-plugins/
+
+# Produkt-Repo buddy (performance-dudes/buddy, eigenes Git-Repo, Worktree-Layout)
+buddy/

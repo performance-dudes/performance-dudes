@@ -90,3 +90,6 @@ codex-plugins/
 
 # Produkt-Repo buddy (performance-dudes/buddy, eigenes Git-Repo, Worktree-Layout)
 buddy/
+
+# Talk und Live-Deck (performance-dudes/team-work, eigenes Git-Repo)
+team-work/

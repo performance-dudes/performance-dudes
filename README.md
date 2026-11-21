@@ -20,14 +20,14 @@ Then in Claude Code:
 
 > Set me up.
 
-Claude reads [CLAUDE.md](CLAUDE.md), detects who you are from GitHub, and walks you through everything. You never pick a role.
+Claude reads [AGENTS.md](AGENTS.md), detects who you are from GitHub, and walks you through everything. You never pick a role.
 
 ## Want to read it yourself?
 
 The full setup guide is **[docs/ONBOARDING.md](docs/ONBOARDING.md)** — read it top
 to bottom if you'd rather see every step (discovering your repo access,
 prerequisites, plugins, cloning, the cockpit channel).
-[CLAUDE.md](CLAUDE.md) holds the rules that apply in *every* session — including
+[AGENTS.md](AGENTS.md) holds the rules that apply in *every* session — including
 signing, the merge policy and commit conventions — and points Claude at the
 onboarding guide when, and only when, it is actually needed. You
 don't have to read either, though: **Claude can help with the entire setup** —

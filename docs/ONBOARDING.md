@@ -1,6 +1,6 @@
 # Onboarding — Performance Dudes Workspace
 
-> **Read this file only when the gate in [`../CLAUDE.md`](../CLAUDE.md) says so.**
+> **Read this file only when the gate in [`../AGENTS.md`](../AGENTS.md) says so.**
 > In a configured workspace it is dead weight — it costs ~3,500 tokens of context
 > and describes steps that are long done.
 
@@ -12,7 +12,7 @@ repos they can actually see on GitHub.
 
 ## Principles for this flow
 
-The standing rules from [`../CLAUDE.md`](../CLAUDE.md#how-to-work) apply — one
+The standing rules from [`../AGENTS.md`](../AGENTS.md#how-to-work) apply — one
 command at a time, never a secret in plain text, idempotent, access rather than
 roles, install nothing without asking. Not duplicated here.
 
@@ -54,7 +54,7 @@ Setup is driven entirely by **which repos the person can see in the org**:
    The org base permission is `none`; whatever shows up here is exactly what may be
    cloned. To check a single repo: `gh repo view performance-dudes/<repo>`.
 3. What someone can do follows from what is visible — no roles, no classification.
-   Clone what is there and read each repo's own `CLAUDE.md`.
+   Clone what is there and read each repo's own `AGENTS.md` (or `CLAUDE.md`).
 
 Greet them by name and with what you found ("you can see these repos — let's set
 them up").
@@ -62,7 +62,7 @@ them up").
 ## The PD repos
 
 Which repos exist, which are public, and the fact that every sub-repo declares its
-own layout is documented in [`../CLAUDE.md`](../CLAUDE.md#the-pd-repos) — that is
+own layout is documented in [`../AGENTS.md`](../AGENTS.md#the-pd-repos) — that is
 where it is maintained, not duplicated here.
 
 For onboarding, only this matters: **clone exactly what `gh repo list` returned**.
@@ -70,9 +70,13 @@ Every person sees a different set; there is no fixed clone list. Do not guess wh
 private repos exist. (Plugins such as `cockpit@ai-plugins-internal` arrive through
 marketplaces, not as clones.)
 
+**New instruction files are named `AGENTS.md`.** If `AGENTS.md` and `CLAUDE.md` sit in
+the same folder, Claude Code reads only `CLAUDE.md` — so never keep both.
+
 ## Prerequisites check
 
 ```bash
+claude --version        # needs >= 2.1.281
 command -v git && git --version
 command -v gh && gh --version
 command -v uv && uv --version
@@ -84,6 +88,8 @@ gh auth status
 
 If something is missing:
 
+- Claude Code below **2.1.281**: `claude update` — older versions ignore
+  `AGENTS.md` silently, so the workspace and repo rules never load.
 - `git`: `brew install git`
 - `gh`: `brew install gh`, then `gh auth login`
 - `uv`: `brew install uv` (or `curl -LsSf https://astral.sh/uv/install.sh | sh`)
@@ -104,12 +110,12 @@ brew install lefthook gitleaks && lefthook install
 
 Rules and the bypass path are documented in the comments of `lefthook.yml`. Real
 secrets belong in `~/.config/pd/` (gitignored). Sub-repos have their own gates, see
-their `CLAUDE.md`.
+their `AGENTS.md`.
 
 ## Plugins setup
 
 The model (marketplace at user scope, plugin per project) is described in
-[`../CLAUDE.md`](../CLAUDE.md#plugins). Here are the one-time setup commands.
+[`../AGENTS.md`](../AGENTS.md#plugins). Here are the one-time setup commands.
 
 **Once per machine — register the marketplaces at user scope:**
 
@@ -152,15 +158,15 @@ Then activate per project, e.g. in the workspace root:
 
 ## Clone the sub-repos
 
-For every repo the person has access to: read the repo's own `CLAUDE.md`, apply the
+For every repo the person has access to: read the repo's own `AGENTS.md`, apply the
 `## Setup default` declared there, and **ask once** whether that is wanted. The
-convention behind it is in [`../CLAUDE.md`](../CLAUDE.md#the-pd-repos).
+convention behind it is in [`../AGENTS.md`](../AGENTS.md#the-pd-repos).
 
-> **Right after cloning, run `cat <repo>/CLAUDE.md` once** — and tell the person
-> what it says. That file does **not** load automatically while the session runs in
+> **Right after cloning, run `cat <repo>/AGENTS.md <repo>/CLAUDE.md 2>/dev/null`
+> once** — and tell the person what it says. That file does **not** load automatically while the session runs in
 > the workspace root (it sits one level below); skipping it means working against
 > repo rules you have never seen. Why that is and what follows from it:
-> [Never change sub-repos from here](../CLAUDE.md#never-change-sub-repos-from-here).
+> [Never change sub-repos from here](../AGENTS.md#never-change-sub-repos-from-here).
 
 **Classic clone:**
 
@@ -187,7 +193,7 @@ If `git clone` fails on a private repo, the person has no access — report that
 clearly and move on.
 
 The `## Setup default` convention itself (classic vs. worktree, who declares it,
-whose preference wins) is documented in [`../CLAUDE.md`](../CLAUDE.md#the-pd-repos) —
+whose preference wins) is documented in [`../AGENTS.md`](../AGENTS.md#the-pd-repos) —
 it applies permanently, not just during setup.
 
 ## cockpit channel
@@ -253,7 +259,7 @@ checklist:
 
 **When something jams** (dead node, 401 from the hub, nothing pops up): that is
 operational knowledge and lives in
-[`../CLAUDE.md`](../CLAUDE.md#cockpit--the-shared-channel) — it applies in every
+[`../AGENTS.md`](../AGENTS.md#cockpit--the-shared-channel) — it applies in every
 session, not just during setup.
 
 Architecture, server/node code, specs, ADRs: separate repo
@@ -267,7 +273,7 @@ When setup is done, do not just stop — orient them. A short, friendly closing
 - **What you now have** — the cloned repos with one line each, the active plugins,
   and the cockpit status (node up? did `ping` get through?).
 - **The structure** — everything sits as a sibling in this workspace folder
-  (`./trust/`, `./pd/`, `./cockpit/`, …), each repo with its own `CLAUDE.md` and its
+  (`./trust/`, `./pd/`, `./cockpit/`, …), each repo with its own `AGENTS.md` and its
   own rules. This repo is the workspace meta repo.
 - **Next steps** — start Claude with the `clc` alias, try `cockpit status`;
   PKI/signing is there **when it is needed** (on demand).

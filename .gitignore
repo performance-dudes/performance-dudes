@@ -90,3 +90,6 @@ codex-plugins/
 
 # Produkt-Repo buddy (performance-dudes/buddy, eigenes Git-Repo, Worktree-Layout)
 buddy/
+
+# Strategie-Repo north-star (performance-dudes/north-star, eigenes Git-Repo)
+north-star/

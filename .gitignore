@@ -93,3 +93,9 @@ buddy/
 
 # Strategie-Repo north-star (performance-dudes/north-star, eigenes Git-Repo)
 north-star/
+
+# Produkt-Repo ops-agent (performance-dudes/ops-agent, eigenes Git-Repo)
+ops-agent/
+
+# Talk- und Live-Deck-Repo team-work (performance-dudes/team-work, eigenes Git-Repo)
+team-work/
